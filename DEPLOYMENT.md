@@ -2,7 +2,13 @@
 
 ## Domain
 
-The intended address is `https://books.scholarlyinsightsacademia.co.uk`. Connect this repository to Cloudflare Workers Builds and initialize the project with vinext (`npx vinext check`, then `npx vinext init`). Add the hostname as a Worker custom domain in Cloudflare. If Cloudflare already hosts authoritative DNS for the parent domain, it will add/manage the subdomain record. Preserve the current main-site records.
+The intended address is `https://books.scholarlyinsightsacademia.co.uk`. Cloudflare's current Next.js path uses vinext. From the repository root, first run `npx vinext check` and review compatibility, then initialize the Cloudflare configuration:
+
+```sh
+npx vinext init --platform=cloudflare --name=scholarly-insights-bookshop --cdn-cache=none --data-cache=none --image-optimization=none
+```
+
+Commit the generated `vite.config.ts`, `cloudflare.config.ts`, and updated package scripts. Connect the repository to Cloudflare Workers Builds only after the generated configuration is committed. The intended hostname is a Worker custom domain: `books.scholarlyinsightsacademia.co.uk`. If Cloudflare hosts authoritative DNS for the parent domain, it can create/manage the subdomain record when the custom domain is added. Preserve the current main-site records.
 
 ## Private settings
 

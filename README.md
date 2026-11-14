@@ -10,7 +10,13 @@ Separate Next.js storefront for **How to Fall Out of Love** by Ewuradjoa Quansah
 
 ## Cloudflare Workers
 
-Cloudflare currently recommends vinext for new full-stack Next.js projects on Workers. This app is prepared with vinext packages and scripts; run `npx vinext check`, then `npx vinext init` and follow the Cloudflare Workers setup for the generated configuration before deployment. Deploy with `npx @vinext/cloudflare deploy`. Since vinext is in beta, review its compatibility output before production. See [Cloudflare's Next.js guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/).
+Cloudflare currently recommends vinext for Next.js projects on Workers. The repository is ready for the migration, but the generated Worker/Vite configuration still needs to be added. From the project folder, run `npx vinext check` and review the report, then run:
+
+```sh
+npx vinext init --platform=cloudflare --name=scholarly-insights-bookshop --cdn-cache=none --data-cache=none --image-optimization=none
+```
+
+This adds the Cloudflare build configuration without replacing the existing Next.js commands. Review and commit the generated source configuration, then use the generated Cloudflare deploy command when ready. Do not deploy the production shop until provider secrets, final assets, shipping settings, and launch checks are complete. Since vinext is in beta, review compatibility output before production. See [Cloudflare's Next.js guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/) and the [vinext Cloudflare deployment guide](https://vinext.dev/docs/deploying/cloudflare).
 
 Connect the GitHub repository to Cloudflare Workers Builds, set the production build/deploy commands from the generated setup, and add `books.scholarlyinsightsacademia.co.uk` as a custom domain for the Worker. Cloudflare provisions the needed DNS record after the domain is active in the same Cloudflare account. Keep the existing main website DNS records unchanged.
 
