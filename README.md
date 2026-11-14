@@ -2,7 +2,7 @@
 
 A growing bookshop for Scholarly Insights Academia. **How to Fall Out of Love** by Ewuradjoa Quansah has its own detail page at /books/how-to-fall-out-of-love. **The Scholarship Blueprint** by Ewuradjoa Mansa Quansah is a forthcoming title only: its supplied draft is not final and it is not available to buy.
 
-The storefront uses a calm, classic palette across the collection while each cover keeps its own colours. Ebook and paperback options are prepared, but checkout remains disabled until the final files, prices, fulfilment settings and integrations are ready and tested.
+The storefront uses a calm, classic palette across the collection while each cover keeps its own colours. The supplied EPUB and website reading PDF are intended for private, purchase-gated delivery. Paperback production files remain a separate requirement. Checkout remains disabled until prices, fulfilment settings and integrations are ready and tested.
 
 ## Local development
 
@@ -18,7 +18,7 @@ Connect this repository to the scholarly-insights-bookshop Worker. Leave the bui
 
 The current Supabase project has the order, verified-purchase review, moderation, fulfilment and order-email schema applied. Its ebooks storage bucket is private with public access disabled; 0005_private_ebook_bucket.sql records this for new environments. Customer reviews require a completed paid order, are moderated before public display, and can be reported.
 
-Email magic-link sign-in is enabled. Supabase redirects are configured for the current Workers preview, local development and planned shop domain, using /auth/callback. Before admin access is available, set ADMIN_EMAILS to the administrator's exact email address in Cloudflare secrets. Keep the service-role key server-side. Upload only the approved final ebook to the private bucket; never commit book files or secrets to GitHub.
+Email magic-link sign-in is enabled. Supabase redirects are configured for the current Workers preview, local development and planned shop domain, using /auth/callback. Before admin access is available, set ADMIN_EMAILS to the administrator's exact email address in Cloudflare secrets. Keep the service-role key server-side. Upload the EPUB and website reading PDF only to the private bucket; never commit book files or secrets to GitHub. Set EBOOK_OBJECT_PATH to the EPUB object and EBOOK_PDF_OBJECT_PATH to the PDF object so paid customers can choose either format from their account.
 
 ## Before selling
 
