@@ -2,13 +2,9 @@
 
 ## Domain
 
-The intended address is `https://books.scholarlyinsightsacademia.co.uk`. Cloudflare's current Next.js path uses vinext. From the repository root, first run `npx vinext check` and review compatibility, then initialize the Cloudflare configuration:
+The intended address is `https://books.scholarlyinsightsacademia.co.uk`. The repository is configured for Cloudflare Workers using vinext. It pins Node.js 22.23.2 for Workers Builds because the current Cloudflare deploy CLI requires a newer runtime than the Workers Builds default. Run `npm run cf:check` and review compatibility before launch.
 
-```sh
-npx vinext init --platform=cloudflare --name=scholarly-insights-bookshop --cdn-cache=none --data-cache=none --image-optimization=none
-```
-
-Commit the generated `vite.config.ts`, `cloudflare.config.ts`, and updated package scripts. Connect the repository to Cloudflare Workers Builds only after the generated configuration is committed. The intended hostname is a Worker custom domain: `books.scholarlyinsightsacademia.co.uk`. If Cloudflare hosts authoritative DNS for the parent domain, it can create/manage the subdomain record when the custom domain is added. Preserve the current main-site records.
+Connect this repository to a Cloudflare Worker named `scholarly-insights-bookshop` using these build settings: leave the build command empty, set deploy command to `npm run deploy:vinext`, and preview command to `npm run preview:vinext`. Add the hostname as a Worker custom domain. If Cloudflare hosts authoritative DNS for the parent domain, it can create/manage the subdomain record. Preserve the current main-site records. Keep checkout disabled while the shop is being reviewed and until launch requirements are complete.
 
 ## Private settings
 

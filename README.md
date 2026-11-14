@@ -4,21 +4,17 @@ Separate Next.js storefront for **How to Fall Out of Love** by Ewuradjoa Quansah
 
 ## Local development
 
-1. Install Node.js 20+ and run `npm install`.
+1. Install Node.js 22.23.2 (the repository pins this version for the Cloudflare tooling) and run `npm install`.
 2. Copy `.env.example` to `.env.local`; keep `CHECKOUT_ENABLED=false`.
 3. Run `npm run dev` and open `http://localhost:3000`.
 
 ## Cloudflare Workers
 
-Cloudflare currently recommends vinext for Next.js projects on Workers. The repository is ready for the migration, but the generated Worker/Vite configuration still needs to be added. From the project folder, run `npx vinext check` and review the report, then run:
+Cloudflare currently recommends vinext for Next.js projects on Workers. The repository now includes the generated Worker and Vite configuration. Run `npm run dev:vinext` to work against the Workers runtime locally, `npm run build:vinext` to build, and `npm run start:vinext` to preview the build locally. Before a production launch, run `npm run cf:check` and review the compatibility report.
 
-```sh
-npx vinext init --platform=cloudflare --name=scholarly-insights-bookshop --cdn-cache=none --data-cache=none --image-optimization=none
-```
+For Cloudflare Workers Builds, leave the build command empty, set the deploy command to `npm run deploy:vinext`, and set the preview command to `npm run preview:vinext`. Connect this repository to the Worker named `scholarly-insights-bookshop`, then add `books.scholarlyinsightsacademia.co.uk` as a Worker custom domain. Keep checkout disabled until provider secrets, final assets, shipping settings, and launch checks are complete. See [Cloudflare's Next.js guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/) and the [vinext Cloudflare deployment guide](https://vinext.dev/docs/deploying/cloudflare).
 
-This adds the Cloudflare build configuration without replacing the existing Next.js commands. Review and commit the generated source configuration, then use the generated Cloudflare deploy command when ready. Do not deploy the production shop until provider secrets, final assets, shipping settings, and launch checks are complete. Since vinext is in beta, review compatibility output before production. See [Cloudflare's Next.js guide](https://developers.cloudflare.com/workers/framework-guides/web-apps/nextjs/) and the [vinext Cloudflare deployment guide](https://vinext.dev/docs/deploying/cloudflare).
-
-Connect the GitHub repository to Cloudflare Workers Builds, set the production build/deploy commands from the generated setup, and add `books.scholarlyinsightsacademia.co.uk` as a custom domain for the Worker. Cloudflare provisions the needed DNS record after the domain is active in the same Cloudflare account. Keep the existing main website DNS records unchanged.
+If Cloudflare hosts authoritative DNS for the parent domain, Cloudflare can manage the subdomain record when the custom domain is added. Keep the existing main website DNS records unchanged.
 
 ## Integrations and launch gates
 
