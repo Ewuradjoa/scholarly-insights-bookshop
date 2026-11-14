@@ -28,6 +28,13 @@ export async function POST(request: Request) {
       customer_name: session.customer_details?.name, shipping_address: session.shipping_details?.address ?? null,
     }, { onConflict: 'stripe_session_id', ignoreDuplicates: true });
     if (error) return NextResponse.json({ error: 'Order could not be recorded.' }, { status: 500 });
+  } else if (event.type === 'charge.refunded') {
+    const charge = event.data.object as Stripe.Charge;
+    const paymentIntentId = typeof charge.payment_intent === 'string' ? charge.payment_intent : null;
+    if (paymentIntentId) {
+      const { error } = await supabaseAdmin().from('orders').update({ status: 'refunded' }).eq('stripe_payment_intent_id', paymentIntentId);
+      if (error) return NextResponse.json({ error: 'Refund status could not be recorded.' }, { status: 500 });
+    }
   }
   return NextResponse.json({ received: true });
 }

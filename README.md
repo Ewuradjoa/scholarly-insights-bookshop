@@ -16,17 +16,17 @@ Connect the GitHub repository to Cloudflare Workers Builds, set the production b
 
 ## Integrations and launch gates
 
-1. Create a Supabase project. Apply `supabase/migrations/0001_shop.sql`. Enable verified email sign-in. Keep the service role key server-side only. Set up private `ebooks` storage with no public read policy.
-2. Add a buyer account sign-in flow before checkout. Set `ADMIN_EMAILS` to the exact administrator email addresses. The current page includes an administrator landing view; the authentication tenant and full order moderation controls still need configuration/implementation.
+1. Create a Supabase project. Apply migrations `0001_shop.sql` and `0002_reviews_and_reporting.sql`. Enable email OTP/magic-link sign-in and configure the callback URL to include `/auth/callback`. Keep the service role key server-side only. Set up private `ebooks` storage with no public read policy.
+2. Set `ADMIN_EMAILS` to the exact administrator email addresses. Customer sign-in, purchase history, download access, verified review submission, approved review display, review reporting, and allowlisted order/review moderation screens are implemented.
 3. In Stripe test mode, create two one-time prices in GBP and set `STRIPE_EBOOK_PRICE_ID` and `STRIPE_PAPERBACK_PRICE_ID`. Register `POST /api/stripe/webhook` for `checkout.session.completed`, `charge.refunded`, and `checkout.session.expired`; configure and store the endpoint signing secret. The current webhook persists completed paid sessions idempotently.
-4. Store final ebook files in a private Supabase bucket. Implement short-lived signed download links and order confirmation email delivery before enabling ebook sales. Do not put book files in `public/`.
-5. Configure Lulu developer sandbox credentials and validate the final print-ready interior, cover, trim size, ISBN and shipping/print settings. Implement order submission and status reconciliation against Lulu's current API contract; no live Lulu calls are made by this starter.
+4. Store final ebook files in a private Supabase bucket. Configure order-confirmation email delivery before enabling ebook sales. Do not put book files in `public/`.
+5. Configure Lulu developer sandbox credentials and validate the final print-ready interior, cover, trim size, ISBN and shipping/print settings. Lulu order submission and status reconciliation still need implementation; no live Lulu calls are made by this starter.
 6. Configure tax, refund, privacy and customer-support policies; test successful payment, failed/cancelled payment, refund, duplicate webhook, ebook download authorization and paperback fulfilment in test mode.
 7. Only after all launch gates pass, set `CHECKOUT_ENABLED=true`, provide all price IDs and fulfillment settings, and change the checkout button UI to submit to `/api/checkout`.
 
 ## Reviews
 
-The migration ties each review to a paid order and authenticated user, permits one review per order, defaults reviews to pending, and exposes only approved reviews to the public. Report counts and moderation fields are present. The customer report endpoint and administrator moderation interface are intentionally not live yet; build and validate authenticated abuse/report controls before collecting public reviews. Approved review display and average-rating UI are also pending.
+The migrations tie each review to a paid order and authenticated user, permit one review per order, default reviews to pending, and expose only approved reviews publicly. Authenticated reports are limited to one per reader per review. Allowlisted administrators can approve or reject reviews and mark reports reviewed or dismissed. The customer account can review eligible paid orders; the product page shows approved notes and an average rating.
 
 ## Secrets
 

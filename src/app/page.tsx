@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowDown, ArrowRight, BookOpen, Check, Feather, Heart, Star } from 'lucide-react';
+import { ReviewSection } from '@/components/ReviewSection';
 
 export default function Home() {
   return <main>
@@ -16,9 +17,9 @@ export default function Home() {
 
     <section className="editions" id="editions"><div className="wrap editions-wrap"><div className="edition-heading"><div><div className="section-kicker">YOUR NEXT CHAPTER STARTS HERE</div><h2>Choose your <em>edition.</em></h2></div><p>Take the format that feels right for you.<br/>Checkout will open once the shop is ready.</p></div><div className="edition-cards"><article className="edition-card ebook"><div className="edition-icon"><BookOpen size={19}/></div><div className="edition-tag">READ ANYWHERE</div><h3>The ebook</h3><p>A quiet companion on your phone, tablet or e-reader. Yours to keep and return to whenever you need it.</p><ul><li><Check size={14}/> Instant download after purchase</li><li><Check size={14}/> PDF / EPUB formats</li><li><Check size={14}/> Secure personal access</li></ul><button className="button button-muted" disabled>Coming soon</button></article><article className="edition-card paperback"><div className="edition-icon"><Feather size={19}/></div><div className="edition-tag">A BOOK TO HOLD</div><h3>The paperback</h3><p>Printed to order and delivered to your door—a tactile space for notes, pauses and turning pages.</p><ul><li><Check size={14}/> Softcover print edition</li><li><Check size={14}/> Printed on demand</li><li><Check size={14}/> Delivery to your address</li></ul><button className="button button-dark" disabled>Coming soon</button></article></div><div className="checkout-note"><span className="lock">✳</span><span><b>The shop is being prepared with care.</b> Payments will become available after secure checkout and book delivery are fully configured.</span></div></div></section>
 
-    <section className="reviews wrap" id="reviews"><div className="review-icon"><Heart size={21}/></div><div><div className="section-kicker">READER NOTES</div><h2>Make space for <em>real stories.</em></h2><p>When the bookshop opens, readers with a completed purchase can leave a verified review. Every note will be reviewed with care before it appears here.</p><div className="review-empty"><span>✳</span><b>The first reader notes will appear here.</b><small>Verified reviews are coming with the bookshop.</small></div></div></section>
+    <ReviewSection />
 
     <section className="closing"><div className="wrap closing-inner"><span>✳</span><p>Your story is still unfolding.<br/><em>Let this be one gentle place to begin.</em></p><a href="#the-book">Back to the beginning ↑</a></div></section>
-    <footer className="footer wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><span>© 2026 Scholarly Insights Academia</span><span>Thoughtfully made for the way forward.</span></footer>
+    <footer className="footer wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><Link href="/account">My account</Link><Link href="/admin/sign-in">Admin</Link><span>© 2026 Scholarly Insights Academia</span><span>Thoughtfully made for the way forward.</span></footer>
   </main>;
 }
