@@ -1,0 +1,39 @@
+import Stripe from 'stripe';
+import { NextResponse } from 'next/server';
+import { checkoutReady } from '@/lib/config';
+import { createClient } from '@supabase/supabase-js';
+
+export const runtime = 'nodejs';
+
+export async function POST(request: Request) {
+  if (!checkoutReady()) return NextResponse.json({ error: 'Checkout is not available yet.' }, { status: 503 });
+  const stripeSecret = process.env.STRIPE_SECRET_KEY;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!stripeSecret || !siteUrl) return NextResponse.json({ error: 'Checkout configuration is incomplete.' }, { status: 503 });
+
+  const body: unknown = await request.json().catch(() => null);
+  if (!body || typeof body !== 'object' || !('edition' in body) || !['ebook', 'paperback'].includes(String(body.edition))) {
+    return NextResponse.json({ error: 'Choose a valid edition.' }, { status: 400 });
+  }
+
+  const edition = body.edition as 'ebook' | 'paperback';
+  const authorization = request.headers.get('authorization');
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!authorization?.startsWith('Bearer ') || !supabaseUrl || !anonKey) return NextResponse.json({ error: 'Sign in before checkout so your order and review eligibility can be securely linked.' }, { status: 401 });
+  const authClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
+  const { data: { user } } = await authClient.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Sign in before checkout.' }, { status: 401 });
+  const price = edition === 'ebook' ? process.env.STRIPE_EBOOK_PRICE_ID : process.env.STRIPE_PAPERBACK_PRICE_ID;
+  if (!price) return NextResponse.json({ error: 'This edition is not configured.' }, { status: 503 });
+
+  const stripe = new Stripe(stripeSecret);
+  const session = await stripe.checkout.sessions.create({
+    mode: 'payment', line_items: [{ price, quantity: 1 }], billing_address_collection: 'required',
+    shipping_address_collection: edition === 'paperback' ? { allowed_countries: ['GB', 'US', 'CA', 'AU', 'NZ', 'IE', 'FR', 'DE', 'ES', 'IT', 'NL', 'BE', 'SE', 'NO', 'DK', 'CH'] } : undefined,
+    success_url: `${siteUrl}/order/thanks?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${siteUrl}/#editions`, allow_promotion_codes: true,
+    metadata: { book_slug: 'how-to-fall-out-of-love', edition, customer_user_id: user.id },
+  });
+  return NextResponse.json({ url: session.url });
+}
