@@ -24,12 +24,13 @@ export async function POST(request: Request) {
   const authClient = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: authorization } } });
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Sign in before checkout.' }, { status: 401 });
+  if (!user.email) return NextResponse.json({ error: 'Your account needs an email address before checkout.' }, { status: 400 });
   const price = edition === 'ebook' ? process.env.STRIPE_EBOOK_PRICE_ID : process.env.STRIPE_PAPERBACK_PRICE_ID;
   if (!price) return NextResponse.json({ error: 'This edition is not configured.' }, { status: 503 });
 
   const stripe = new Stripe(stripeSecret);
   const session = await stripe.checkout.sessions.create({
-    mode: 'payment', line_items: [{ price, quantity: 1 }], billing_address_collection: 'required',
+    mode: 'payment', line_items: [{ price, quantity: 1 }], billing_address_collection: 'required', customer_email: user.email,
     shipping_address_collection: edition === 'paperback' ? { allowed_countries: ['GB'] } : undefined,
     shipping_options: edition === 'paperback' && process.env.STRIPE_PAPERBACK_SHIPPING_RATE_ID ? [{ shipping_rate: process.env.STRIPE_PAPERBACK_SHIPPING_RATE_ID }] : undefined,
     phone_number_collection: edition === 'paperback' ? { enabled: true } : undefined,

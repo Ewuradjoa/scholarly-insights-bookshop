@@ -2,6 +2,7 @@ import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { submitSandboxPrintJob } from '@/lib/lulu';
+import { sendOrderConfirmation } from '@/lib/order-email';
 
 export const runtime = 'nodejs';
 
@@ -31,6 +32,29 @@ export async function POST(request: Request) {
       shipping_phone: session.customer_details?.phone ?? null,
     }, { onConflict: 'stripe_session_id', ignoreDuplicates: true });
     if (error) return NextResponse.json({ error: 'Order could not be recorded.' }, { status: 500 });
+    const { data: orderForEmail, error: emailOrderError } = await db.from('orders').select('id,customer_email,edition,amount_total,currency,confirmation_email_status').eq('stripe_session_id', session.id).single();
+    if (emailOrderError || !orderForEmail) return NextResponse.json({ error: 'Paid order could not be loaded for its confirmation email.' }, { status: 500 });
+    if (orderForEmail.confirmation_email_status !== 'sent') {
+      const { data: claimed, error: claimError } = await db.rpc('claim_order_confirmation_email', { p_order_id: orderForEmail.id });
+      if (claimError) return NextResponse.json({ error: 'Order confirmation could not be queued.' }, { status: 500 });
+      if (claimed) {
+        try {
+          await sendOrderConfirmation({
+            orderId: orderForEmail.id,
+            sessionId: session.id,
+            email: orderForEmail.customer_email,
+            edition: orderForEmail.edition,
+            amountTotal: orderForEmail.amount_total,
+            currency: orderForEmail.currency,
+          });
+          const { error: sentError } = await db.from('orders').update({ confirmation_email_status: 'sent', confirmation_email_sent_at: new Date().toISOString(), confirmation_email_error: null }).eq('id', orderForEmail.id);
+          if (sentError) return NextResponse.json({ error: 'Confirmation email was sent but its status could not be saved.' }, { status: 500 });
+        } catch {
+          await db.from('orders').update({ confirmation_email_status: 'failed', confirmation_email_error: 'The order confirmation could not be delivered. It will be retried automatically.' }).eq('id', orderForEmail.id);
+          return NextResponse.json({ error: 'Order confirmation email could not be sent.' }, { status: 500 });
+        }
+      }
+    }
     if (edition === 'paperback') {
       const { data: order, error: lookupError } = await db.from('orders').select('id,shipping_address,shipping_phone,customer_name,customer_email,fulfilment_status').eq('stripe_session_id', session.id).single();
       if (lookupError || !order) return NextResponse.json({ error: 'Paid order could not be loaded for fulfilment.' }, { status: 500 });
