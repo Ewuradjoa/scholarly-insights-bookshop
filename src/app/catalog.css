@@ -1,0 +1,38 @@
+/* Multi-title shop and book-specific cover artwork. */
+.real-book-cover{position:relative;z-index:1;height:450px;max-width:86%;width:auto;object-fit:contain;transform:rotate(-1.3deg);filter:drop-shadow(17px 18px 18px #50493b38)}
+.catalog-hero{min-height:580px;display:grid;grid-template-columns:1.08fr .92fr;align-items:center;padding:45px 7% 70px;gap:50px}
+.catalog-hero-copy{padding:10px 0}
+.catalog-hero h1{font:400 55px/1.13 'Playfair Display',serif;letter-spacing:-.03em;margin:24px 0 20px}
+.catalog-hero h1 em,.catalog-heading h2 em,.catalog-about h2 em{font-weight:400;color:var(--olive)}
+.catalog-hero-copy .dek{max-width:440px;margin-bottom:27px}
+.catalog-hero-book{height:465px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;text-decoration:none;color:var(--muted)}
+.catalog-hero-book:before{content:'';position:absolute;width:355px;height:355px;border-radius:50%;background:#eeece3;z-index:0}
+.catalog-hero-book img{position:relative;z-index:1;height:420px;max-width:88%;object-fit:contain;transform:rotate(1deg);filter:drop-shadow(16px 17px 19px #50493b38);transition:transform .25s ease}
+.catalog-hero-book:hover img{transform:rotate(0) translateY(-5px)}
+.catalog-hero-book span{position:absolute;z-index:2;bottom:1px;display:flex;align-items:center;gap:8px;font-size:8px;letter-spacing:.18em}
+.catalog-list{padding:56px 0 92px}
+.catalog-heading{display:flex;align-items:end;justify-content:space-between;margin-bottom:30px}
+.catalog-heading h2,.catalog-about h2{font:400 40px/1.2 'Playfair Display',serif;margin:14px 0 0}
+.catalog-heading>p{font-size:11px;color:var(--muted);line-height:1.8;max-width:295px;margin:0 0 3px}
+.catalog-book{position:relative;display:grid;grid-template-columns:185px 1fr 46px;gap:32px;align-items:center;padding:30px;background:#f1f0e9;border:1px solid #e5e3d9}
+.catalog-book-forthcoming{margin-top:15px;background:#faf9f5}
+.catalog-book-forthcoming .catalog-book-cover img{max-height:100%;box-shadow:7px 8px 17px #50493b24}
+.catalog-book-cover{height:260px;display:flex;align-items:center;justify-content:center}
+.catalog-book-cover img{height:100%;max-width:100%;object-fit:contain;box-shadow:9px 11px 20px #50493b2b;transition:transform .2s ease}
+.catalog-book-cover:hover img{transform:translateY(-4px)}
+.catalog-book-copy h3{font:400 29px 'Playfair Display';margin:12px 0 4px}
+.catalog-book-copy>p{max-width:580px;color:#71746b;font-size:11px;line-height:1.8;margin:12px 0}
+.catalog-book-copy .catalog-subtitle{margin:0;color:#62665c;font:italic 13px/1.6 'Playfair Display'}
+.catalog-author{display:flex;align-items:center;gap:8px;color:#73776a;font-size:10px;margin:18px 0 13px}
+.catalog-formats{display:flex;gap:7px;margin-bottom:18px}
+.catalog-formats span{border:1px solid #d4d5c9;padding:6px 9px;color:#6c705f;font-size:9px}
+.catalog-book-index{align-self:start;justify-self:end;color:#9a9c8b;font:italic 20px 'Playfair Display'}
+.catalog-book-copy .button{width:max-content}
+.catalog-coming{text-align:center;color:#85877e;font:italic 13px 'Playfair Display';margin:25px 0 0}
+.catalog-about{background:#efeee7;border-block:1px solid #e5e3d9}
+.catalog-about-inner{min-height:260px;display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:30px}
+.catalog-about-inner>span{color:#a0a088;font-size:22px}
+.catalog-about h2{margin-top:12px}
+.catalog-about p{font-size:11px;line-height:1.8;color:#72756c;max-width:425px}
+.catalog-about-inner>a{display:flex;align-items:center;gap:8px;color:#59634a;text-decoration:none;font-size:10px;border-bottom:1px solid #afb09f;padding-bottom:7px}
+@media(max-width:760px){.real-book-cover{height:425px;max-width:90%}.catalog-hero{min-height:0;grid-template-columns:1fr;gap:16px;padding:54px 5px 35px}.catalog-hero h1{font-size:46px}.catalog-hero-book{height:440px}.catalog-hero-book:before{width:300px;height:300px}.catalog-hero-book img{height:400px}.catalog-list{padding:45px 0 62px}.catalog-heading{display:block}.catalog-heading h2{font-size:35px}.catalog-heading>p{margin-top:12px}.catalog-book{grid-template-columns:105px 1fr;gap:18px;padding:18px}.catalog-book-cover{height:170px}.catalog-book-copy h3{font-size:23px}.catalog-book-index{display:none}.catalog-book-copy .button{font-size:10px;min-width:0;padding:0 12px}.catalog-about-inner{grid-template-columns:25px 1fr;padding:36px 0;gap:16px}.catalog-about h2{font-size:34px}.catalog-about-inner>a{grid-column:2;width:max-content;margin-top:4px}}

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import './catalog.css';
 import './admin.css';
 
 export const metadata: Metadata = {
-  title: 'Scholarly Insights Bookshop | How to Fall Out of Love',
-  description: 'A thoughtful guide to understanding why you hold on and learning how to let go, by Ewuradjoa Quansah.',
+  title: 'Scholarly Insights Academia Bookshop',
+  description: 'Thoughtful books by Ewuradjoa Quansah. Explore the Scholarly Insights Academia bookshop.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
