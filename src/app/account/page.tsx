@@ -7,6 +7,20 @@ import { supabaseBrowser } from '@/lib/supabase-browser';
 
 type Order = { id: string; edition: string; status: string; created_at: string; fulfilment_status: string; tracking_url: string | null };
 
+async function downloadEbook(format: 'epub' | 'pdf') {
+  const session = await supabaseBrowser().auth.getSession();
+  const response = await fetch('/api/ebook', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + (session.data.session?.access_token ?? ''),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ format }),
+  });
+  const result = await response.json();
+  if (result.url) window.location.assign(result.url);
+}
+
 export default function AccountPage() {
   const [email, setEmail] = useState<string | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -33,5 +47,5 @@ export default function AccountPage() {
 
   async function signOut() { await supabaseBrowser().auth.signOut(); setEmail(null); setOrders([]); }
 
-  return <main className="account-page"><Link href="/" className="back-link">← Bookshop</Link><p className="section-kicker">YOUR BOOKSHOP ACCOUNT</p><h1>{email ? 'Your reading shelf' : 'A link to your shelf.'}</h1>{loading ? <p>Loading your account…</p> : email ? <><p className="account-intro">Signed in as <b>{email}</b>. Your orders and download access live here.</p><div className="account-top"><h2>Your orders</h2><button onClick={signOut} className="text-button">Sign out</button></div>{orders.length ? <div className="account-orders">{orders.map((order) => <article key={order.id}><div><b>{order.edition === 'ebook' ? 'How to Fall Out of Love · Ebook' : 'How to Fall Out of Love · Paperback'}</b><small>{new Date(order.created_at).toLocaleDateString('en-GB')} · {order.status}</small></div>{order.edition === 'ebook' && order.status === 'paid' ? <button onClick={async () => { const session = await supabaseBrowser().auth.getSession(); const response = await fetch('/api/ebook', { method: 'POST', headers: { Authorization: `Bearer ${session.data.session?.access_token}` } }); const result = await response.json(); if (result.url) window.location.assign(result.url); }} className="button button-dark">Download ebook</button> : <span>{order.fulfilment_status}{order.tracking_url ? <a href={order.tracking_url}> · Track parcel</a> : null}</span>}</article>)}</div> : <p>Your completed purchases will appear here.</p>}<Link href="/books/how-to-fall-out-of-love#reviews" className="account-review-link">Purchased the book? Leave a verified review →</Link></> : <><p className="account-intro">Use your email to sign in or create an account. We’ll send you a secure link—no password needed.</p><AuthForm next={next}/></>}</main>;
+  return <main className="account-page"><Link href="/" className="back-link">← Bookshop</Link><p className="section-kicker">YOUR BOOKSHOP ACCOUNT</p><h1>{email ? 'Your reading shelf' : 'A link to your shelf.'}</h1>{loading ? <p>Loading your account…</p> : email ? <><p className="account-intro">Signed in as <b>{email}</b>. Your orders and download access live here.</p><div className="account-top"><h2>Your orders</h2><button onClick={signOut} className="text-button">Sign out</button></div>{orders.length ? <div className="account-orders">{orders.map((order) => <article key={order.id}><div><b>{order.edition === 'ebook' ? 'How to Fall Out of Love · Ebook' : 'How to Fall Out of Love · Paperback'}</b><small>{new Date(order.created_at).toLocaleDateString('en-GB')} · {order.status}</small></div>{order.edition === 'ebook' && order.status === 'paid' ? <div className="ebook-downloads"><button onClick={() => void downloadEbook('epub')} className="button button-dark">Download EPUB</button><button onClick={() => void downloadEbook('pdf')} className="button button-muted">Download website PDF</button></div> : <span>{order.fulfilment_status}{order.tracking_url ? <a href={order.tracking_url}> · Track parcel</a> : null}</span>}</article>)}</div> : <p>Your completed purchases will appear here.</p>}<Link href="/books/how-to-fall-out-of-love#reviews" className="account-review-link">Purchased the book? Leave a verified review →</Link></> : <><p className="account-intro">Use your email to sign in or create an account. We’ll send you a secure link—no password needed.</p><AuthForm next={next}/></>}</main>;
 }
