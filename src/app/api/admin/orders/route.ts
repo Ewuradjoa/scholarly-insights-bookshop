@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   const { error } = await requireAdmin(request);
   if (error) return NextResponse.json({ error }, { status: 403 });
   const { data, error: dbError } = await supabaseAdmin().from('orders')
-    .select('id,edition,status,amount_total,currency,customer_email,customer_name,shipping_address,created_at,ebook_delivered_at,fulfilment_status,fulfilment_error,lulu_job_id,tracking_url')
+    .select('id,edition,status,amount_total,currency,customer_email,customer_name,shipping_address,created_at,ebook_delivered_at,confirmation_email_status,fulfilment_status,fulfilment_error,lulu_job_id,tracking_url')
     .order('created_at', { ascending: false }).limit(250);
   if (dbError) return NextResponse.json({ error: 'Could not load orders.' }, { status: 503 });
   return NextResponse.json({ orders: data ?? [] }, { headers: { 'Cache-Control': 'no-store' } });
