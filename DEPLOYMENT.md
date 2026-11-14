@@ -6,7 +6,7 @@ The intended address is https://books.scholarlyinsightsacademia.co.uk. The repos
 
 ## Supabase and private files
 
-The current project has the bookshop order, verified review, moderation, fulfilment and order-email schema applied. The ebooks storage bucket is private with public access disabled. supabase/migrations/0005_private_ebook_bucket.sql records this for new environments. Email magic-link sign-in is enabled, and redirects are configured for the current Workers preview, local development and planned shop domain using /auth/callback. Add the administrator's exact email to ADMIN_EMAILS as a Cloudflare secret before using the admin dashboard. Keep the service-role key server-side. Upload only an approved final ebook to private storage; never put book files in public/ or GitHub.
+The current project has the bookshop order, verified review, moderation, fulfilment and order-email schema applied. The ebooks storage bucket is private with public access disabled. supabase/migrations/0005_private_ebook_bucket.sql records this for new environments. Email magic-link sign-in is enabled, and redirects are configured for the current Workers preview, local development and planned shop domain using /auth/callback. Add the administrator's exact email to ADMIN_EMAILS as a Cloudflare secret before using the admin dashboard. Keep the service-role key server-side. Upload the supplied EPUB and website reading PDF only to private storage; never put book files in public/ or GitHub. Configure EBOOK_OBJECT_PATH for the EPUB and EBOOK_PDF_OBJECT_PATH for the PDF.
 
 ## Provider configuration
 
@@ -19,4 +19,4 @@ Keep CHECKOUT_ENABLED=false, FULFILMENT_CONFIGURED=false and LAUNCH_CHECKS_PASSE
 - Supabase schema and private ebook bucket are set up.
 - Email magic-link sign-in and redirect URLs are configured.
 - The repository includes the multi-book storefront, disabled checkout gate, Stripe webhook, private ebook delivery, verified reviews, admin order dashboard and Lulu sandbox integration.
-- Still needed before selling: final book files and print specifications, provider credentials and prices, sandbox sign-off, administrator email in Cloudflare secrets, and the Cloudflare custom domain.
+- Still needed before selling: final book files in private storage, print specifications, provider credentials and prices, sandbox sign-off, administrator email in Cloudflare secrets, and the Cloudflare custom domain.
