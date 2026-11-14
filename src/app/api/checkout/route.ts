@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     shipping_options: edition === 'paperback' && process.env.STRIPE_PAPERBACK_SHIPPING_RATE_ID ? [{ shipping_rate: process.env.STRIPE_PAPERBACK_SHIPPING_RATE_ID }] : undefined,
     phone_number_collection: edition === 'paperback' ? { enabled: true } : undefined,
     success_url: `${siteUrl}/order/thanks?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${siteUrl}/#editions`, allow_promotion_codes: true,
+    cancel_url: `${siteUrl}/books/how-to-fall-out-of-love#editions`, allow_promotion_codes: true,
     metadata: { book_slug: 'how-to-fall-out-of-love', edition, customer_user_id: user.id },
   });
   return NextResponse.json({ url: session.url });
