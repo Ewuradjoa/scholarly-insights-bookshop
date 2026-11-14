@@ -11,8 +11,8 @@
     "dev:vinext": "vite dev --port 3001",
     "build:vinext": "vite build",
     "start:vinext": "vite preview",
-    "deploy:vinext": "vinext-cloudflare deploy",
-    "preview:vinext": "vinext-cloudflare previews deploy"
+    "deploy:vinext": "npx @vinext/cloudflare deploy",
+    "preview:vinext": "npx @vinext/cloudflare previews deploy"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
