@@ -8,7 +8,7 @@
 - Supabase project has the shop schema, email sign-in redirects and a private `ebooks` bucket.
 - The private bucket contains `how-to-fall-out-of-love/How_to_Fall_Out_of_Love.epub` and `how-to-fall-out-of-love/How_to_Fall_Out_of_Love_Website_Edition.pdf`. `cloudflare.config.ts` sets these object paths. No book files belong in `public/` or GitHub.
 - The Scholarship Blueprint is a forthcoming catalogue listing. Its supplied cover is a draft and it is not for sale.
-- The How to Fall Out of Love back-cover panel and full-wrap concept are available in the workspace review outputs. The author has chosen the Scholarly Insights Academia imprint and does not want to buy an ISBN. Prepare this edition for sales through the author's own shop/Lulu Direct; do not select Global Distribution or add a barcode.
+- The How to Fall Out of Love back-cover panel and full-wrap concept are available in the workspace review outputs. The author has chosen the Scholarly Insights Academia imprint and does not want to buy an ISBN. Prepare this edition for the author's own shop using the Lulu Print API; do not select Global Distribution or add a barcode.
 
 ## Remaining before checkout can be enabled
 
