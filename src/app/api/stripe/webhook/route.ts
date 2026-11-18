@@ -22,6 +22,14 @@ export async function POST(request: Request) {
     if (session.payment_status !== 'paid' || session.metadata?.book_slug !== 'how-to-fall-out-of-love' || !session.metadata.customer_user_id) return NextResponse.json({ received: true });
     const edition = session.metadata.edition;
     if (edition !== 'ebook' && edition !== 'paperback') return NextResponse.json({ received: true });
+    const shippingRateId = session.shipping_cost?.shipping_rate ?? null;
+    const shippingLevels = new Map<string, 'MAIL' | 'PRIORITY_MAIL' | 'EXPRESS'>([
+      [process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID ?? '', 'MAIL'],
+      [process.env.STRIPE_PAPERBACK_PRIORITY_SHIPPING_RATE_ID ?? '', 'PRIORITY_MAIL'],
+      [process.env.STRIPE_PAPERBACK_EXPRESS_SHIPPING_RATE_ID ?? '', 'EXPRESS'],
+    ].filter(([rateId]) => Boolean(rateId)) as [string, 'MAIL' | 'PRIORITY_MAIL' | 'EXPRESS'][]);
+    const shippingLevel = shippingRateId ? shippingLevels.get(shippingRateId) : undefined;
+    if (edition === 'paperback' && !shippingLevel) return NextResponse.json({ error: 'Selected Stripe delivery option is not mapped to Lulu.' }, { status: 500 });
     const db = supabaseAdmin();
     const { error } = await db.from('orders').upsert({
       stripe_session_id: session.id, stripe_payment_intent_id: typeof session.payment_intent === 'string' ? session.payment_intent : null,
@@ -30,6 +38,7 @@ export async function POST(request: Request) {
       currency: session.currency, customer_email: session.customer_details?.email ?? session.customer_email,
       customer_name: session.customer_details?.name, shipping_address: session.shipping_details?.address ?? null,
       shipping_phone: session.customer_details?.phone ?? null,
+      shipping_method: shippingLevel ?? null,
     }, { onConflict: 'stripe_session_id', ignoreDuplicates: true });
     if (error) return NextResponse.json({ error: 'Order could not be recorded.' }, { status: 500 });
     const { data: orderForEmail, error: emailOrderError } = await db.from('orders').select('id,customer_email,edition,amount_total,currency,confirmation_email_status').eq('stripe_session_id', session.id).single();
@@ -63,7 +72,7 @@ export async function POST(request: Request) {
         if (claimError) return NextResponse.json({ error: 'Paperback fulfilment could not be queued.' }, { status: 500 });
         if (claimed?.length) {
           try {
-            const job = await submitSandboxPrintJob({ orderId: order.id, shippingAddress: order.shipping_address, phone: order.shipping_phone, customerName: order.customer_name });
+            const job = await submitSandboxPrintJob({ orderId: order.id, shippingAddress: order.shipping_address, phone: order.shipping_phone, customerName: order.customer_name, shippingLevel: shippingLevel! });
             const { error: saveError } = await db.from('orders').update({ lulu_job_id: job.id, fulfilment_status: 'submitted', fulfilment_error: null }).eq('id', order.id);
             if (saveError) return NextResponse.json({ error: 'Print job was submitted but its reference could not be saved.' }, { status: 500 });
           } catch {

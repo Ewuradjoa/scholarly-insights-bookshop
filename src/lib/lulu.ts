@@ -1,5 +1,5 @@
 type LuluAddress = { line1?: string | null; line2?: string | null; city?: string | null; state?: string | null; postal_code?: string | null; country?: string | null };
-type LuluOrder = { orderId: string; shippingAddress: LuluAddress | null; phone: string | null; customerName: string | null };
+type LuluOrder = { orderId: string; shippingAddress: LuluAddress | null; phone: string | null; customerName: string | null; shippingLevel: 'MAIL' | 'PRIORITY_MAIL' | 'EXPRESS' };
 type TokenPayload = { access_token?: string; expires_in?: number };
 type PrintJobPayload = { id?: string | number; status?: string };
 
@@ -52,13 +52,12 @@ export async function submitSandboxPrintJob(order: LuluOrder): Promise<{ id: str
   }
   const contactEmail = process.env.LULU_CONTACT_EMAIL;
   const podPackageId = process.env.LULU_POD_PACKAGE_ID;
-  const shippingLevel = process.env.LULU_SHIPPING_LEVEL;
-  if (!contactEmail || !podPackageId || !shippingLevel) throw new Error('Lulu product or contact settings are incomplete.');
+  if (!contactEmail || !podPackageId) throw new Error('Lulu product or contact settings are incomplete.');
 
   const payload = {
     external_id: order.orderId,
     contact_email: contactEmail,
-    shipping_level: shippingLevel,
+    shipping_level: order.shippingLevel,
     line_items: [{
       external_id: `${order.orderId}-paperback`,
       pod_package_id: podPackageId,

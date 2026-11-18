@@ -12,7 +12,7 @@ async function downloadEbook(format: 'epub' | 'pdf') {
   const response = await fetch('/api/ebook', {
     method: 'POST',
     headers: {
-      Authorization: 'Bearer ' + (session.data.session?.access_token ?? ''),
+Authorization: 'Bearer ' + (session.data.session?.access_token ?? ''),
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ format }),

@@ -13,7 +13,6 @@ export async function POST(request: Request) {
   if (!authorization?.startsWith('Bearer ') || !url || !anon || !bucket || !format || !objectPath) {
     return NextResponse.json({ error: 'That ebook format is not available yet.' }, { status: 503 });
   }
-
   const authClient = createClient(url, anon, { global: { headers: { Authorization: authorization } } });
   const { data: { user } } = await authClient.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Sign in to access your purchase.' }, { status: 401 });

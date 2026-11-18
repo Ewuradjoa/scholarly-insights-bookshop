@@ -28,11 +28,22 @@ export async function POST(request: Request) {
   const price = edition === 'ebook' ? process.env.STRIPE_EBOOK_PRICE_ID : process.env.STRIPE_PAPERBACK_PRICE_ID;
   if (!price) return NextResponse.json({ error: 'This edition is not configured.' }, { status: 503 });
 
+  const paperbackShippingRates = edition === 'paperback'
+    ? [
+        process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID,
+        process.env.STRIPE_PAPERBACK_PRIORITY_SHIPPING_RATE_ID,
+        process.env.STRIPE_PAPERBACK_EXPRESS_SHIPPING_RATE_ID,
+      ].filter((rate): rate is string => Boolean(rate))
+    : [];
+  if (edition === 'paperback' && paperbackShippingRates.length !== 3) {
+    return NextResponse.json({ error: 'Paperback delivery options are not fully configured.' }, { status: 503 });
+  }
+
   const stripe = new Stripe(stripeSecret);
   const session = await stripe.checkout.sessions.create({
     mode: 'payment', line_items: [{ price, quantity: 1 }], billing_address_collection: 'required', customer_email: user.email,
     shipping_address_collection: edition === 'paperback' ? { allowed_countries: ['GB'] } : undefined,
-    shipping_options: edition === 'paperback' && process.env.STRIPE_PAPERBACK_SHIPPING_RATE_ID ? [{ shipping_rate: process.env.STRIPE_PAPERBACK_SHIPPING_RATE_ID }] : undefined,
+    shipping_options: edition === 'paperback' ? paperbackShippingRates.map((shipping_rate) => ({ shipping_rate })) : undefined,
     phone_number_collection: edition === 'paperback' ? { enabled: true } : undefined,
     success_url: `${siteUrl}/order/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/books/how-to-fall-out-of-love#editions`, allow_promotion_codes: true,
