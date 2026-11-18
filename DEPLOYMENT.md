@@ -1,22 +1,25 @@
-# Deployment and setup checklist
+# Deployment and launch checklist
 
-## Domain
+## Current live setup
 
-The intended address is https://books.scholarlyinsightsacademia.co.uk. The repository is set up for Cloudflare Workers Builds with vinext. Use an empty build command, npm run deploy:vinext as the deploy command, and npm run preview:vinext for previews. Add the custom domain when launch settings and final book files are ready, and preserve existing main-site DNS records.
+- Cloudflare Worker: `scholarly-insights-bookshop` at `https://scholarly-insights-bookshop.scholarlyinsightsconsulting.workers.dev`.
+- Intended shop address: `https://books.scholarlyinsightsacademia.co.uk`. The custom domain has not been added yet.
+- Checkout is disabled. The worker config explicitly keeps `CHECKOUT_ENABLED`, `FULFILMENT_CONFIGURED` and `LAUNCH_CHECKS_PASSED` false.
+- Supabase project has the shop schema, email sign-in redirects and a private `ebooks` bucket.
+- The private bucket contains `how-to-fall-out-of-love/How_to_Fall_Out_of_Love.epub` and `how-to-fall-out-of-love/How_to_Fall_Out_of_Love_Website_Edition.pdf`. `cloudflare.config.ts` sets these object paths. No book files belong in `public/` or GitHub.
+- The Scholarship Blueprint is a forthcoming catalogue listing. Its supplied cover is a draft and it is not for sale.
 
-## Supabase and private files
+## Remaining before checkout can be enabled
 
-The current project has the bookshop order, verified review, moderation, fulfilment and order-email schema applied. The `ebooks` storage bucket is private with public access disabled. `supabase/migrations/0005_private_ebook_bucket.sql` records this for new environments. Email magic-link sign-in is enabled, and redirects are configured for the current Workers preview, local development and planned shop domain using `/auth/callback`. Add the administrator's exact email to `ADMIN_EMAILS` as a Cloudflare secret before using the admin dashboard. Keep the service-role key server-side. Upload the supplied EPUB and website reading PDF only to private storage; never put book files in `public/` or GitHub. Configure `EBOOK_OBJECT_PATH` for the EPUB and `EBOOK_PDF_OBJECT_PATH` for the PDF.
+1. **Lulu print package:** use `How_to_Fall_Out_of_Love_Final_Interior_Production.pdf` (6 × 9 inches, 103 pages) as the print interior, after Lulu preflight accepts it. The available cover PNG is front cover art only. Generate the Lulu full-wrap cover from the final trim size, paper, ink and page count, then review and approve the proof. Keep the print interior and wrap cover separate from the website PDF and EPUB.
+2. **Paperback price and delivery:** the agreed customer price is £19.99 with basic UK tracked delivery included; priority and express are upgrades. Add and verify the corresponding Stripe test products and shipping rates against Lulu's actual print and delivery costs before treating the margin as final.
+3. **Provider setup:** store the Supabase server key, Stripe test key and webhook signing secret, Resend key, and Lulu sandbox credentials as Cloudflare secrets. Add the administrator's exact email to `ADMIN_EMAILS`. Never put secrets in Git or chat.
+4. **Lulu sandbox:** configure the package ID and stable print-file URLs plus checksums. `LULU_PRINT_API_BASE` must remain `https://api.sandbox.lulu.com` during testing.
+5. **End-to-end review:** verify sign-in and admin access, successful and failed payments, webhook replay and refunds, confirmation email, paid-only EPUB/PDF access, review eligibility/moderation/reporting, and sandbox paperback fulfilment/status updates.
+6. **Launch setup:** review customer support, tax and refund information. After all checks pass, configure the custom domain while preserving existing main-site DNS records. Only then enable checkout and fulfilment.
 
-## Provider configuration
+Do not set `CHECKOUT_ENABLED=true`, `FULFILMENT_CONFIGURED=true` or `LAUNCH_CHECKS_PASSED=true` until the above checks and launch approvals are complete. The ebook buyer price remains capped at £9.99; Stripe fees come out of that amount, so proceeds will be less than £9.99.
 
-Add the Supabase project URL, anon key and service-role key, Stripe test secret and webhook secret, Resend key, and Lulu sandbox credentials as Cloudflare secrets, never in Git or chat. Set `ADMIN_EMAILS` to the exact admin address. Configure GBP ebook and paperback prices, and Stripe UK shipping rates for basic tracked delivery included in the paperback price plus priority and express upgrades. Configure the Stripe webhook, verified email sender, and Lulu sandbox package plus print-only interior and cover PDFs. Keep the print files separate from the ebook. Lulu requests remain restricted to `https://api.sandbox.lulu.com`.
+## Environment reference
 
-Keep CHECKOUT_ENABLED=false, FULFILMENT_CONFIGURED=false and LAUNCH_CHECKS_PASSED=false until payment, refund, webhook replay, email, ebook access, Lulu fulfilment and admin access have all been reviewed. Configure international shipping and customer-support, tax and refund policies before offering those options.
-
-## Current state
-
-- Supabase schema and private ebook bucket are set up.
-- Email magic-link sign-in and redirect URLs are configured.
-- The repository includes the multi-book storefront, disabled checkout gate, Stripe webhook, private ebook delivery, verified reviews, admin order dashboard and Lulu sandbox integration.
-- Still needed before selling: final book files in private storage, print specifications, provider credentials and prices, sandbox sign-off, administrator email in Cloudflare secrets, and the Cloudflare custom domain.
+Use `.env.example` as the list of required names. Put secret values in Cloudflare Worker secrets, not in `cloudflare.config.ts`, source control, or messages. Non-secret runtime settings and the two private ebook object paths are configured in cloudflare.config.ts.
