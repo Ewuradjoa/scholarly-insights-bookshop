@@ -19,9 +19,9 @@ function configuredLulu() {
 async function accessToken() {
   if (cachedToken && cachedTokenExpiresAt > Date.now() + 60_000) return cachedToken;
   const { base, key, secret } = configuredLulu();
-  const authorization = btoa(`${key}:${secret}`);
-  const response = await fetch(`${base}/auth/realms/glasstree/protocol/openid-connect/token`, {
-    method: 'POST', headers: { Authorization: `Basic ${authorization}`, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=client_credentials',
+  const authorization = btoa(key + ':' + secret);
+  const response = await fetch(base + '/auth/realms/glasstree/protocol/openid-connect/token', {
+    method: 'POST', headers: { Authorization: 'Basic ' + authorization, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'grant_type=client_credentials',
   });
   if (!response.ok) throw new Error('Lulu sandbox authentication failed.');
   const result = await response.json() as TokenPayload;
@@ -31,16 +31,21 @@ async function accessToken() {
   return cachedToken;
 }
 
+export async function verifySandboxConnection(): Promise<void> {
+  // Authentication only: this does not create a print job or submit any book.
+  await accessToken();
+}
+
 function publicHttpsUrl(value: string | undefined, name: string) {
-  if (!value) throw new Error(`${name} is missing.`);
+  if (!value) throw new Error(name + ' is missing.');
   let parsed: URL;
-  try { parsed = new URL(value); } catch { throw new Error(`${name} is not a valid URL.`); }
-  if (parsed.protocol !== 'https:') throw new Error(`${name} must be an HTTPS download URL.`);
+  try { parsed = new URL(value); } catch { throw new Error(name + ' is not a valid URL.'); }
+  if (parsed.protocol !== 'https:') throw new Error(name + ' must be an HTTPS download URL.');
   return parsed.toString();
 }
 
 function md5(value: string | undefined, name: string) {
-  if (!value || !/^[a-f\d]{32}$/i.test(value)) throw new Error(`${name} must be a 32-character MD5 checksum.`);
+  if (!value || !new RegExp('^[a-fA-F0-9]{32}$').test(value)) throw new Error(name + ' must be a 32-character MD5 checksum.');
   return value.toUpperCase();
 }
 
@@ -59,7 +64,7 @@ export async function submitSandboxPrintJob(order: LuluOrder): Promise<{ id: str
     contact_email: contactEmail,
     shipping_level: order.shippingLevel,
     line_items: [{
-      external_id: `${order.orderId}-paperback`,
+      external_id: order.orderId + '-paperback',
       pod_package_id: podPackageId,
       quantity: 1,
       interior: { source_url: publicHttpsUrl(process.env.LULU_INTERIOR_URL, 'LULU_INTERIOR_URL'), source_md5sum: md5(process.env.LULU_INTERIOR_MD5, 'LULU_INTERIOR_MD5') },
@@ -77,12 +82,12 @@ export async function submitSandboxPrintJob(order: LuluOrder): Promise<{ id: str
     },
   };
 
-  const response = await fetch(`${base}/print-jobs/`, {
+  const response = await fetch(base + '/print-jobs/', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${await accessToken()}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers: { Authorization: 'Bearer ' + await accessToken(), 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error(`Lulu sandbox rejected the print job (${response.status}).`);
+  if (!response.ok) throw new Error('Lulu sandbox rejected the print job (' + response.status + ').');
   const result = await response.json() as PrintJobPayload;
   if (result.id === undefined || result.id === null) throw new Error('Lulu sandbox returned no print job reference.');
   return { id: String(result.id), status: result.status };
@@ -90,9 +95,9 @@ export async function submitSandboxPrintJob(order: LuluOrder): Promise<{ id: str
 
 export async function getSandboxPrintJobStatus(jobId: string): Promise<string> {
   const { base } = configuredLulu();
-  if (!/^[\w-]+$/.test(jobId)) throw new Error('Invalid Lulu print job reference.');
-  const response = await fetch(`${base}/print-jobs/${encodeURIComponent(jobId)}/status/`, {
-    headers: { Authorization: `Bearer ${await accessToken()}`, Accept: 'application/json' },
+  if (!new RegExp('^[A-Za-z0-9_-]+$').test(jobId)) throw new Error('Invalid Lulu print job reference.');
+  const response = await fetch(base + '/print-jobs/' + encodeURIComponent(jobId) + '/status/', {
+    headers: { Authorization: 'Bearer ' + await accessToken(), Accept: 'application/json' },
   });
   if (!response.ok) throw new Error('Could not refresh the Lulu sandbox job status.');
   const result = await response.json() as { status?: string };
