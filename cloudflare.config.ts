@@ -23,6 +23,12 @@ export default defineConfig({
       NEXT_PUBLIC_SITE_URL: bindings.text("https://books.scholarlyinsightsacademia.co.uk"),
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.text("sb_publishable_pK-BQqz-vBfBR23RFlGuqg_LBifokcq"),
       NEXT_PUBLIC_SUPABASE_URL: bindings.text("https://sqtfcjtdimkfydiwsoqx.supabase.co"),
+      // Stripe test-mode IDs only. Replace them with live IDs during the launch switch.
+      STRIPE_EBOOK_PRICE_ID: bindings.text("price_1UdDs12BQYE4I5dXWWXfUrzq"),
+      STRIPE_PAPERBACK_PRICE_ID: bindings.text("price_1UdDsU2BQYE4I5dXeQQV6ubX"),
+      STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID: bindings.text("shr_1UdDt32BQYE4I5dXaTAGfafZ"),
+      STRIPE_PAPERBACK_PRIORITY_SHIPPING_RATE_ID: bindings.text("shr_1UdDtG2BQYE4I5dXUTkpaifu"),
+      STRIPE_PAPERBACK_EXPRESS_SHIPPING_RATE_ID: bindings.text("shr_1UdDtW2BQYE4I5dXrrByUBTB"),
     },
   }),
 });
