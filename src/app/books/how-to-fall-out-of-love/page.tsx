@@ -8,17 +8,17 @@ import { checkoutReady } from '@/lib/config';
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
   title: 'How to Fall Out of Love | Scholarly Insights Academia',
-  description: 'A gentle, honest companion for understanding why we hold on and learning how to let go, by Ewuradjoa Quansah.',
+  description: 'A gentle, honest companion for understanding why we hold on and learning how to let go, by Dr Ewuradjoa Mansa Quansah.',
 };
 
 export default function Home() {
   const checkoutOpen = checkoutReady();
   return <main>
-    <div className="announcement">A new perspective on love, loss and letting go <span>·</span> By Ewuradjoa Quansah</div>
+    <div className="announcement">A new perspective on love, loss and letting go <span>·</span> By Dr Ewuradjoa Mansa Quansah</div>
     <header className="nav wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><nav><Link href="/">All books</Link><a href="#inside">Inside the book</a><a href="#reviews">Reader notes</a></nav><a href="#editions" className="nav-cta">Choose your edition <ArrowRight size={15}/></a></header>
 
-    <section className="hero wrap" id="the-book"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-line"/> A GUIDE TO LETTING GO</p><h1>Some endings<br/>are <em>beginnings</em><br/>in disguise.</h1><p className="dek">A gentle, honest companion for understanding why we hold on—and finding the courage to choose ourselves again.</p><div className="byline"><span className="avatar">EQ</span><span><b>Ewuradjoa Quansah</b><small>Author · Scholarly Insights Academia</small></span></div><a href="#editions" className="button button-dark">Find your edition <ArrowDown size={16}/></a><div className="hero-proof"><span><Star size={14} fill="currentColor"/> A thoughtful read for your next chapter</span></div></div>
-      <div className="book-stage"><div className="sun-disc"/><div className="book-shadow"/><img className="real-book-cover" src="/books/how-to-fall-out-of-love.png" alt="Cover of How to Fall Out of Love by Ewuradjoa Quansah"/><div className="stage-caption">A little space to find yourself again <span>✳</span></div></div>
+    <section className="hero wrap" id="the-book"><div className="hero-copy"><p className="eyebrow"><span className="eyebrow-line"/> A GUIDE TO LETTING GO</p><h1>Some endings<br/>are <em>beginnings</em><br/>in disguise.</h1><p className="dek">A gentle, honest companion for understanding why we hold on—and finding the courage to choose ourselves again.</p><div className="byline"><span className="avatar">EQ</span><span><b>Dr Ewuradjoa Mansa Quansah</b><small>Author · Scholarly Insights Academia</small></span></div><a href="#editions" className="button button-dark">Find your edition <ArrowDown size={16}/></a><div className="hero-proof"><span><Star size={14} fill="currentColor"/> A thoughtful read for your next chapter</span></div></div>
+      <div className="book-stage"><div className="sun-disc"/><div className="book-shadow"/><img className="real-book-cover" src="/books/how-to-fall-out-of-love.png" alt="Cover of How to Fall Out of Love by Dr Ewuradjoa Mansa Quansah"/><div className="stage-caption">A little space to find yourself again <span>✳</span></div></div>
     </section>
 
     <section className="quote-band"><div className="wrap quote-inner"><span className="quote-mark">“</span><p>Letting go is not forgetting what mattered.<br/><em>It is remembering that you matter, too.</em></p><span className="quote-note">A note for the heart in transition</span></div></section>

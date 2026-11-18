@@ -5,7 +5,7 @@ import './admin.css';
 
 export const metadata: Metadata = {
   title: 'Scholarly Insights Academia Bookshop',
-  description: 'Thoughtful books by Ewuradjoa Quansah. Explore the Scholarly Insights Academia bookshop.',
+  description: 'Thoughtful books by Dr Ewuradjoa Mansa Quansah. Explore the Scholarly Insights Academia bookshop.',
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

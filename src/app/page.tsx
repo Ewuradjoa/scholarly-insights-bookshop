@@ -4,20 +4,20 @@ import { ArrowDown, ArrowRight, BookOpen } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Bookshop | Scholarly Insights Academia',
-  description: 'Thoughtful books by Ewuradjoa Quansah. Explore the Scholarly Insights Academia bookshop.',
+  description: 'Thoughtful books by Dr Ewuradjoa Mansa Quansah. Explore the Scholarly Insights Academia bookshop.',
 };
 
 const featuredBook = {
   href: '/books/how-to-fall-out-of-love',
   title: 'How to Fall Out of Love',
   subtitle: 'Understanding Why You Hold On and Learning How to Let Go',
-  author: 'Ewuradjoa Quansah',
+  author: 'Dr Ewuradjoa Mansa Quansah',
   cover: '/books/how-to-fall-out-of-love.png',
 };
 
 const forthcomingBook = {
   title: 'The Scholarship Blueprint',
-  author: 'Ewuradjoa Mansa Quansah',
+  author: 'Dr Ewuradjoa Mansa Quansah',
   cover: '/books/scholarship-blueprint.png',
 };
 
@@ -26,7 +26,7 @@ export default function Home() {
     <div className="announcement">A BOOKSHOP FOR THE CHAPTERS THAT CHANGE US <span>·</span> SCHOLARLY INSIGHTS ACADEMIA</div>
     <header className="nav wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><nav><a href="#books">Books</a><a href="#about">About the bookshop</a></nav><a href="#books" className="nav-cta">Explore books <ArrowRight size={15}/></a></header>
 
-    <section className="catalog-hero wrap"><div className="catalog-hero-copy"><p className="eyebrow"><span className="eyebrow-line"/> WORDS FOR THE WAY FORWARD</p><h1>Thoughtful books<br/>for the chapters<br/><em>that change us.</em></h1><p className="dek">Explore honest, hopeful writing by Ewuradjoa Quansah—books to return to as life asks something new of you.</p><a href="#books" className="button button-dark">Browse the bookshop <ArrowDown size={16}/></a></div><Link className="catalog-hero-book" href={featuredBook.href} aria-label={`Discover ${featuredBook.title}`}><img src={featuredBook.cover} alt={`Cover of ${featuredBook.title} by ${featuredBook.author}`}/><span>NOW IN THE BOOKSHOP <ArrowRight size={14}/></span></Link></section>
+    <section className="catalog-hero wrap"><div className="catalog-hero-copy"><p className="eyebrow"><span className="eyebrow-line"/> WORDS FOR THE WAY FORWARD</p><h1>Thoughtful books<br/>for the chapters<br/><em>that change us.</em></h1><p className="dek">Explore honest, hopeful writing by Dr Ewuradjoa Mansa Quansah—books to return to as life asks something new of you.</p><a href="#books" className="button button-dark">Browse the bookshop <ArrowDown size={16}/></a></div><Link className="catalog-hero-book" href={featuredBook.href} aria-label={`Discover ${featuredBook.title}`}><img src={featuredBook.cover} alt={`Cover of ${featuredBook.title} by ${featuredBook.author}`}/><span>NOW IN THE BOOKSHOP <ArrowRight size={14}/></span></Link></section>
 
     <section className="catalog-list wrap" id="books"><div className="catalog-heading"><div><div className="section-kicker">A GROWING COLLECTION</div><h2>Browse the <em>bookshop.</em></h2></div><p>Each title has its own page with the story, available editions and reader notes.</p></div>
       <article className="catalog-book"><Link className="catalog-book-cover" href={featuredBook.href}><img src={featuredBook.cover} alt={`Cover of ${featuredBook.title}`}/></Link><div className="catalog-book-copy"><div className="section-kicker">PERSONAL GROWTH · REFLECTIONS</div><h3>{featuredBook.title}</h3><p className="catalog-subtitle">{featuredBook.subtitle}</p><p>A gentle, honest companion for understanding why we hold on—and finding the courage to choose ourselves again.</p><div className="catalog-author"><BookOpen size={16}/> By {featuredBook.author}</div><div className="catalog-formats"><span>Ebook</span><span>Paperback</span></div><Link href={featuredBook.href} className="button button-dark">Discover this book <ArrowRight size={15}/></Link></div><div className="catalog-book-index">01</div></article>
