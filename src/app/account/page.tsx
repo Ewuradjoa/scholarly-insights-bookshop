@@ -11,10 +11,7 @@ async function downloadEbook(format: 'epub' | 'pdf') {
   const session = await supabaseBrowser().auth.getSession();
   const response = await fetch('/api/ebook', {
     method: 'POST',
-    headers: {
-Authorization: 'Bearer ' + (session.data.session?.access_token ?? ''),
-      'Content-Type': 'application/json',
-    },
+    headers: { Authorization: 'Bearer ' + (session.data.session?.access_token ?? ''), 'Content-Type': 'application/json' },
     body: JSON.stringify({ format }),
   });
   const result = await response.json();
@@ -26,10 +23,14 @@ export default function AccountPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [next, setNext] = useState('/account');
+  const [authError, setAuthError] = useState(false);
+
   useEffect(() => {
     let active = true;
-    const requestedNext = new URLSearchParams(window.location.search).get('next');
+    const params = new URLSearchParams(window.location.search);
+    const requestedNext = params.get('next');
     if (requestedNext?.startsWith('/') && !requestedNext.startsWith('//')) setNext(requestedNext);
+    setAuthError(params.get('auth') === 'expired');
     try {
       const supabase = supabaseBrowser();
       supabase.auth.getUser().then(async ({ data }) => {
@@ -47,5 +48,5 @@ export default function AccountPage() {
 
   async function signOut() { await supabaseBrowser().auth.signOut(); setEmail(null); setOrders([]); }
 
-  return <main className="account-page"><Link href="/" className="back-link">← Bookshop</Link><p className="section-kicker">YOUR BOOKSHOP ACCOUNT</p><h1>{email ? 'Your reading shelf' : 'A link to your shelf.'}</h1>{loading ? <p>Loading your account…</p> : email ? <><p className="account-intro">Signed in as <b>{email}</b>. Your orders and download access live here.</p><div className="account-top"><h2>Your orders</h2><button onClick={signOut} className="text-button">Sign out</button></div>{orders.length ? <div className="account-orders">{orders.map((order) => <article key={order.id}><div><b>{order.edition === 'ebook' ? 'How to Fall Out of Love · Ebook' : 'How to Fall Out of Love · Paperback'}</b><small>{new Date(order.created_at).toLocaleDateString('en-GB')} · {order.status}</small></div>{order.edition === 'ebook' && order.status === 'paid' ? <div className="ebook-downloads"><button onClick={() => void downloadEbook('epub')} className="button button-dark">Download EPUB</button><button onClick={() => void downloadEbook('pdf')} className="button button-muted">Download website PDF</button></div> : <span>{order.fulfilment_status}{order.tracking_url ? <a href={order.tracking_url}> · Track parcel</a> : null}</span>}</article>)}</div> : <p>Your completed purchases will appear here.</p>}<Link href="/books/how-to-fall-out-of-love#reviews" className="account-review-link">Purchased the book? Leave a verified review →</Link></> : <><p className="account-intro">Use your email to sign in or create an account. We’ll send you a secure link—no password needed.</p><AuthForm next={next}/></>}</main>;
+  return <main className="account-page"><Link href="/" className="back-link">← Bookshop</Link><p className="section-kicker">YOUR BOOKSHOP ACCOUNT</p><h1>{email ? 'Your reading shelf' : 'A link to your shelf.'}</h1>{authError && <p role="alert">That sign-in link has expired or was already used. Request a fresh link below.</p>}{loading ? <p>Loading your account…</p> : email ? <><p className="account-intro">Signed in as <b>{email}</b>. Your orders and download access live here.</p><div className="account-top"><h2>Your orders</h2><button onClick={signOut} className="text-button">Sign out</button></div>{orders.length ? <div className="account-orders">{orders.map((order) => <article key={order.id}><div><b>{order.edition === 'ebook' ? 'How to Fall Out of Love · Ebook' : 'How to Fall Out of Love · Paperback'}</b><small>{new Date(order.created_at).toLocaleDateString('en-GB')} · {order.status}</small></div>{order.edition === 'ebook' && order.status === 'paid' ? <div className="ebook-downloads"><button onClick={() => void downloadEbook('epub')} className="button button-dark">Download EPUB</button><button onClick={() => void downloadEbook('pdf')} className="button button-muted">Download website PDF</button></div> : <span>{order.fulfilment_status}{order.tracking_url ? <a href={order.tracking_url}> · Track parcel</a> : null}</span>}</article>)}</div> : <p>Your completed purchases will appear here.</p>}<Link href="/books/how-to-fall-out-of-love#reviews" className="account-review-link">Purchased the book? Leave a verified review →</Link></> : <><p className="account-intro">Use your email to sign in or create an account. We’ll send you a secure link—no password needed.</p><AuthForm next={next}/></>}</main>;
 }
