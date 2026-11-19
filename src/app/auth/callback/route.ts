@@ -1,27 +1,21 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get('code');
-  const tokenHash = searchParams.get('token_hash');
-  const type = searchParams.get('type');
-  const destination = searchParams.get('next');
+  const incoming = new URL(request.url);
+  const code = incoming.searchParams.get('code');
+  const destination = incoming.searchParams.get('next');
   const next = destination?.startsWith('/') && !destination.startsWith('//') ? destination : '/account';
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key || (!code && (!tokenHash || type !== 'email'))) return NextResponse.redirect(`${origin}/account?auth=invalid`);
-  const jar = await cookies();
-  const supabase = createServerClient(url, key, {
-    cookies: {
-      getAll: () => jar.getAll(),
-      setAll: (items) => items.forEach(({ name, value, options }) => jar.set(name, value, options)),
-    },
-  });
-  const { error } = code
-    ? await supabase.auth.exchangeCodeForSession(code)
-    : await supabase.auth.verifyOtp({ token_hash: tokenHash!, type: 'email' });
-  if (error) return NextResponse.redirect(`${origin}/account?auth=expired`);
-  return NextResponse.redirect(`${origin}${next}`);
+
+  // Complete PKCE sign-in in the browser, where Supabase's verifier cookie is available.
+  if (!code) {
+    const retry = new URL('/account', incoming.origin);
+    retry.searchParams.set('auth', 'expired');
+    retry.searchParams.set('next', next);
+    return NextResponse.redirect(retry);
+  }
+
+  const complete = new URL('/auth/complete', incoming.origin);
+  complete.searchParams.set('code', code);
+  complete.searchParams.set('next', next);
+  return NextResponse.redirect(complete);
 }
