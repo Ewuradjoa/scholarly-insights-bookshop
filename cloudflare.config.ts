@@ -1,5 +1,10 @@
 import { bindings, defineConfig, defineWorker } from "cf/config";
 
+// Workers Builds provides these at build time. Keep credentials out of the
+// repository and pass the values into the deployed Worker configuration.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+
 export default defineConfig({
   worker: defineWorker({
     name: "scholarly-insights-bookshop",
@@ -21,8 +26,8 @@ export default defineConfig({
       LULU_PRINT_API_BASE: bindings.text("https://api.sandbox.lulu.com"),
       LULU_SANDBOX: bindings.text("true"),
       NEXT_PUBLIC_SITE_URL: bindings.text("https://books.scholarlyinsightsacademia.co.uk"),
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.text("sb_publishable_pK-BQqz-vBfBR23RFlGuqg_LBifokcq"),
-      NEXT_PUBLIC_SUPABASE_URL: bindings.text("https://sqtfcjtdimkfydiwsoqx.supabase.co"),
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.text(supabasePublishableKey),
+      NEXT_PUBLIC_SUPABASE_URL: bindings.text(supabaseUrl),
       // Stripe test-mode IDs only. Replace them with live IDs during the launch switch.
       STRIPE_EBOOK_PRICE_ID: bindings.text("price_1UdDs12BQYE4I5dXWWXfUrzq"),
       STRIPE_PAPERBACK_PRICE_ID: bindings.text("price_1UdDsU2BQYE4I5dXeQQV6ubX"),
