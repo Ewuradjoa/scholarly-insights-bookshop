@@ -23,12 +23,14 @@ export default defineConfig({
     },
     env: {
       ASSETS: bindings.assets(),
-      CHECKOUT_ENABLED: bindings.text(process.env.CHECKOUT_ENABLED ?? "false"),
+      // These production launch gates are enabled in the Worker dashboard. Keep
+      // the deploy configuration aligned unless Workers Builds supplies overrides.
+      CHECKOUT_ENABLED: bindings.text(process.env.CHECKOUT_ENABLED ?? "true"),
       EBOOK_OBJECT_PATH: bindings.text("how-to-fall-out-of-love/How_to_Fall_Out_of_Love.epub"),
       EBOOK_PDF_OBJECT_PATH: bindings.text("how-to-fall-out-of-love/How_to_Fall_Out_of_Love_Website_Edition.pdf"),
       EBOOK_PRIVATE_BUCKET: bindings.text("ebooks"),
       FULFILMENT_CONFIGURED: bindings.text(process.env.FULFILMENT_CONFIGURED ?? "false"),
-      LAUNCH_CHECKS_PASSED: bindings.text(process.env.LAUNCH_CHECKS_PASSED ?? "false"),
+      LAUNCH_CHECKS_PASSED: bindings.text(process.env.LAUNCH_CHECKS_PASSED ?? "true"),
       LULU_AUTO_SUBMIT: bindings.text("false"),
       // These values come from Workers Builds variables, not this public repo.
       LULU_CONTACT_EMAIL: bindings.text(process.env.LULU_CONTACT_EMAIL ?? ""),
