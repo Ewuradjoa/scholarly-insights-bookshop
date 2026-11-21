@@ -5,6 +5,7 @@ type OrderConfirmation = {
   amountTotal: number | null;
   currency: string | null;
   sessionId: string;
+  digitalContentConsentAt?: string | null;
 };
 
 export async function sendOrderConfirmation(order: OrderConfirmation) {
@@ -42,6 +43,9 @@ export async function sendOrderConfirmation(order: OrderConfirmation) {
         order.edition === 'ebook'
           ? `Sign in to your bookshop account to access your ebook: ${accountUrl}`
           : `You can follow your paperback order from your bookshop account: ${accountUrl}`,
+        order.edition === 'ebook' && order.digitalContentConsentAt
+          ? `Digital content consent: You agreed to immediate ebook supply and acknowledged that your 14-day right to cancel would be lost once supply began. Consent recorded at: ${order.digitalContentConsentAt}.`
+          : null,
         '',
         'Keep this email for your records. Your ebook download is protected and is not attached to this message.',
       ].filter(Boolean).join('\n'),
@@ -49,3 +53,4 @@ export async function sendOrderConfirmation(order: OrderConfirmation) {
   });
   if (!response.ok) throw new Error(`Order email provider returned ${response.status}.`);
 }
+
