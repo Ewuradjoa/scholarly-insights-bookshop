@@ -14,5 +14,7 @@ export default async function AdminPage() {
   const supabase = createServerClient(url, anon, { cookies: { getAll: () => jar.getAll(), setAll: () => {} } });
   const { data: { user } } = await supabase.auth.getUser();
   if (!user || !adminAllowlist().includes((user.email ?? '').toLowerCase())) redirect('/admin/sign-in');
+  const { data: claimData, error: claimsError } = await supabase.auth.getClaims();
+  if (claimsError || claimData?.claims?.aal !== 'aal2') redirect('/admin/mfa');
   return <AdminDashboardShell/>;
 }

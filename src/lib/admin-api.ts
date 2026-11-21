@@ -9,5 +9,8 @@ export async function requireAdmin(request: Request): Promise<{ user: User | nul
   const db = createClient(url, key, { global: { headers: { Authorization: authorization } } });
   const { data: { user }, error } = await db.auth.getUser();
   if (error || !user || !adminAllowlist().includes((user.email ?? '').toLowerCase())) return { user: null, error: 'Administrator access is required.' };
+  const accessToken = authorization.slice('Bearer '.length);
+  const { data: claimData, error: claimsError } = await db.auth.getClaims(accessToken);
+  if (claimsError || claimData?.claims?.aal !== 'aal2') return { user: null, error: 'Complete the administrator authenticator check.' };
   return { user, error: null };
 }
