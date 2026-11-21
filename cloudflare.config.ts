@@ -30,8 +30,14 @@ export default defineConfig({
       FULFILMENT_CONFIGURED: bindings.text(process.env.FULFILMENT_CONFIGURED ?? "false"),
       LAUNCH_CHECKS_PASSED: bindings.text(process.env.LAUNCH_CHECKS_PASSED ?? "false"),
       LULU_AUTO_SUBMIT: bindings.text("false"),
-      // Lulu file locations, checksums and production package details are added
-      // only after fulfilment settings are completed in Cloudflare.
+      // These values come from Workers Builds variables, not this public repo.
+      LULU_CONTACT_EMAIL: bindings.text(process.env.LULU_CONTACT_EMAIL ?? ""),
+      LULU_COVER_MD5: bindings.text(process.env.LULU_COVER_MD5 ?? ""),
+      LULU_COVER_OBJECT_PATH: bindings.text(process.env.LULU_COVER_OBJECT_PATH ?? ""),
+      LULU_FILES_BUCKET: bindings.text(process.env.LULU_FILES_BUCKET ?? ""),
+      LULU_INTERIOR_MD5: bindings.text(process.env.LULU_INTERIOR_MD5 ?? ""),
+      LULU_INTERIOR_OBJECT_PATH: bindings.text(process.env.LULU_INTERIOR_OBJECT_PATH ?? ""),
+      LULU_POD_PACKAGE_ID: bindings.text(process.env.LULU_POD_PACKAGE_ID ?? ""),
       // Production is the Cloudflare default; local development can opt into
       // the sandbox through the values in .env.example.
       LULU_MODE: bindings.text(process.env.LULU_MODE ?? "production"),
