@@ -17,7 +17,7 @@ export default function CheckoutPage() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) { const next = `/checkout?edition=${edition}`; window.location.replace(`/account?next=${encodeURIComponent(next)}`); return; }
         const response = await fetch('/api/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ edition }) });
-        const result = await response.json();
+        const result = await response.json() as { url?: string; error?: string };
         if (!response.ok || !result.url) { if (active) setMessage(result.error ?? 'Checkout is not available yet.'); return; }
         window.location.assign(result.url);
       } catch { if (active) setMessage('Checkout is not available yet.'); }

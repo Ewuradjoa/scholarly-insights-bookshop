@@ -14,7 +14,7 @@ async function downloadEbook(format: 'epub' | 'pdf') {
     headers: { Authorization: 'Bearer ' + (session.data.session?.access_token ?? ''), 'Content-Type': 'application/json' },
     body: JSON.stringify({ format }),
   });
-  const result = await response.json();
+  const result = await response.json() as { url?: string; error?: string };
   if (result.url) window.location.assign(result.url);
 }
 

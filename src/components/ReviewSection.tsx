@@ -19,14 +19,17 @@ export function ReviewSection() {
 
   async function load() {
     const response = await fetch('/api/reviews', { cache: 'no-store' });
-    if (response.ok) setSummary(await response.json());
+    if (response.ok) setSummary(await response.json() as Summary);
     try {
       const supabase = supabaseBrowser();
       const { data: { session } } = await supabase.auth.getSession();
       setSignedIn(Boolean(session));
       if (session) {
         const eligible = await fetch('/api/reviews/eligible', { headers: { Authorization: `Bearer ${session.access_token}` } });
-        if (eligible.ok) setOrders((await eligible.json()).orders ?? []);
+        if (eligible.ok) {
+          const data = await eligible.json() as { orders?: EligibleOrder[] };
+          setOrders(Array.isArray(data.orders) ? data.orders : []);
+        }
       }
     } catch { setSignedIn(false); }
   }
@@ -40,7 +43,7 @@ export function ReviewSection() {
     const form = new FormData(formElement);
     const session = await supabaseBrowser().auth.getSession();
     const response = await fetch('/api/reviews', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.data.session?.access_token}` }, body: JSON.stringify({ orderId: form.get('orderId'), rating: Number(rating), title: form.get('title'), body: form.get('body') }) });
-    const result = await response.json();
+    const result = await response.json() as { error?: string };
     setFormMessage(response.ok ? 'Thank you. Your review is waiting for approval.' : result.error ?? 'Your review could not be submitted.');
     if (response.ok) { setOrders((current) => current.filter((order) => order.order_id !== form.get('orderId'))); formElement.reset(); setRating('5'); }
     setBusy(false);
@@ -49,7 +52,8 @@ export function ReviewSection() {
   async function reportReview(reviewId: string, reason: string) {
     const session = await supabaseBrowser().auth.getSession();
     const response = await fetch('/api/reviews/report', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.data.session?.access_token}` }, body: JSON.stringify({ reviewId, reason }) });
-    setFormMessage(response.ok ? 'Thank you. We’ve received your report.' : (await response.json()).error ?? 'We could not submit the report.');
+    const result = response.ok ? null : await response.json() as { error?: string };
+    setFormMessage(response.ok ? 'Thank you. We’ve received your report.' : result?.error ?? 'We could not submit the report.');
   }
 
   return <section className="reviews wrap" id="reviews"><div className="review-icon"><Star size={21}/></div><div><div className="section-kicker">READER NOTES</div><h2>Make space for <em>real stories.</em></h2><p>Every public note comes from a completed purchase and is reviewed before it appears.</p>

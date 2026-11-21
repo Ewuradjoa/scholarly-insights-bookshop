@@ -22,7 +22,8 @@ export async function POST(request: Request) {
     if (session.payment_status !== 'paid' || session.metadata?.book_slug !== 'how-to-fall-out-of-love' || !session.metadata.customer_user_id) return NextResponse.json({ received: true });
     const edition = session.metadata.edition;
     if (edition !== 'ebook' && edition !== 'paperback') return NextResponse.json({ received: true });
-    const shippingRateId = session.shipping_cost?.shipping_rate ?? null;
+    const shippingRate = session.shipping_cost?.shipping_rate;
+    const shippingRateId = typeof shippingRate === 'string' ? shippingRate : shippingRate?.id ?? null;
     const shippingLevels = new Map<string, 'MAIL' | 'PRIORITY_MAIL' | 'EXPRESS'>([
       [process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID ?? '', 'MAIL'],
       [process.env.STRIPE_PAPERBACK_PRIORITY_SHIPPING_RATE_ID ?? '', 'PRIORITY_MAIL'],

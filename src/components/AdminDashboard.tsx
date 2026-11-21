@@ -24,10 +24,11 @@ export function AdminDashboard() {
       setMessage('Could not load the admin data. Check your sign-in and configuration.');
       return;
     }
-    setOrders((await ordersResponse.json()).orders);
-    const moderation = await reviewsResponse.json();
-    setReviews(moderation.reviews);
-    setReports(moderation.reports);
+    const orderData = await ordersResponse.json() as { orders?: Order[] };
+    const moderation = await reviewsResponse.json() as { reviews?: Review[]; reports?: Report[] };
+    setOrders(Array.isArray(orderData.orders) ? orderData.orders : []);
+    setReviews(Array.isArray(moderation.reviews) ? moderation.reviews : []);
+    setReports(Array.isArray(moderation.reports) ? moderation.reports : []);
   }
 
   useEffect(() => { void load(); }, []);
@@ -40,7 +41,7 @@ export function AdminDashboard() {
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
       body: JSON.stringify(body),
     });
-    const result = await response.json();
+    const result = await response.json() as { error?: string };
     setMessage(response.ok ? 'Saved.' : result.error ?? 'Could not save.');
     if (response.ok) await load();
   }
@@ -53,7 +54,7 @@ export function AdminDashboard() {
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
       body: JSON.stringify({ id }),
     });
-    const result = await response.json();
+    const result = await response.json() as { luluStatus?: string; error?: string };
     setMessage(response.ok ? 'Lulu status: ' + result.luluStatus : result.error ?? 'Could not refresh Lulu status.');
     if (response.ok) await load();
   }
@@ -65,7 +66,7 @@ export function AdminDashboard() {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
     });
-    const result = await response.json();
+    const result = await response.json() as { error?: string };
     setMessage(response.ok ? 'Lulu sandbox connection verified. No print job was created.' : result.error ?? 'Could not verify the Lulu sandbox connection.');
   }
 
@@ -77,7 +78,7 @@ export function AdminDashboard() {
       headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
       body: JSON.stringify({ id }),
     });
-    const result = await response.json();
+    const result = await response.json() as { error?: string };
     setMessage(response.ok ? 'Order confirmation email sent.' : result.error ?? 'Could not resend order email.');
     if (response.ok) await load();
   }
