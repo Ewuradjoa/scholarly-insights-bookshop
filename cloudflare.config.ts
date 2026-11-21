@@ -6,6 +6,8 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabasePublishableKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 export default defineConfig({
+  // Resolve the target account explicitly in non-interactive Workers Builds.
+  accountId: "588a68ac8fce8c9a1b1d5e21da66da68",
   worker: defineWorker({
     name: "scholarly-insights-bookshop",
     domains: ["books.scholarlyinsightsacademia.co.uk"],
