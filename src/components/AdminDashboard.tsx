@@ -87,6 +87,19 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
     setMessage(response.ok ? 'Lulu sandbox connection verified. No print job was created.' : result.error ?? 'Could not verify the Lulu sandbox connection.');
   }
 
+  async function approveLuluSubmission(id: string) {
+    setMessage('');
+    const session = await supabaseBrowser().auth.getSession();
+    const response = await fetch('/api/admin/orders/lulu-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
+      body: JSON.stringify({ id }),
+    });
+    const result = await response.json() as { error?: string };
+    setMessage(response.ok ? 'Owner approved: the paperback print job was sent to Lulu sandbox.' : result.error ?? 'The print job could not be submitted.');
+    if (response.ok) await load();
+  }
+
   async function retryOrderEmail(id: string) {
     setMessage('');
     const session = await supabaseBrowser().auth.getSession();
@@ -170,6 +183,7 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
             <small>{new Date(order.created_at).toLocaleString('en-GB')} · {order.status} · {order.amount_total != null ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: (order.currency || 'gbp').toUpperCase() }).format(order.amount_total / 100) : '—'}</small>
             <small>Confirmation email: {order.confirmation_email_status}</small>
             {order.shipping_method && <small>Delivery option: {order.shipping_method}</small>}
+            {order.edition === 'paperback' && order.status === 'paid' && order.fulfilment_status === 'not_started' && <small>Awaiting owner approval before print.</small>}
             {order.confirmation_email_status === 'failed' && order.status === 'paid' && <button className="admin-refresh" onClick={() => void retryOrderEmail(order.id)}>Retry confirmation email</button>}
             {order.shipping_address && <small>{Object.values(order.shipping_address).filter(Boolean).join(', ')}</small>}
             {order.lulu_job_id && <small>Lulu sandbox job {order.lulu_job_id}</small>}
@@ -184,6 +198,7 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
             <input key={order.id + '-' + (order.tracking_url ?? '')} defaultValue={order.tracking_url ?? ''} placeholder="https://…" onBlur={(event) => { if (event.target.value !== (order.tracking_url ?? '')) void update('/api/admin/orders', { id: order.id, fulfilmentStatus: order.fulfilment_status, trackingUrl: event.target.value || null }); }} />
           </label>
           {order.lulu_job_id && <button className="admin-refresh" onClick={() => void refreshLulu(order.id)}>Refresh Lulu status</button>}
+          {ownerAccess && order.edition === 'paperback' && order.status === 'paid' && order.fulfilment_status === 'not_started' && !order.lulu_job_id && <button className="admin-refresh" onClick={() => void approveLuluSubmission(order.id)}>Approve and send to Lulu sandbox</button>}
           {order.ebook_delivered_at && <small>Ebook link used {new Date(order.ebook_delivered_at).toLocaleDateString('en-GB')}</small>}
         </article>)}
       </div>}

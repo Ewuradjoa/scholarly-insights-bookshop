@@ -23,6 +23,7 @@ export default defineConfig({
       EBOOK_PRIVATE_BUCKET: bindings.text("ebooks"),
       FULFILMENT_CONFIGURED: bindings.text("false"),
       LAUNCH_CHECKS_PASSED: bindings.text("false"),
+      LULU_AUTO_SUBMIT: bindings.text("false"),
       LULU_PRINT_API_BASE: bindings.text("https://api.sandbox.lulu.com"),
       LULU_SANDBOX: bindings.text("true"),
       NEXT_PUBLIC_SITE_URL: bindings.text("https://books.scholarlyinsightsacademia.co.uk"),

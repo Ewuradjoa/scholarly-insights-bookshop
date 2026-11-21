@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         }
       }
     }
-    if (edition === 'paperback') {
+    if (edition === 'paperback' && process.env.LULU_AUTO_SUBMIT === 'true') {
       const { data: order, error: lookupError } = await db.from('orders').select('id,shipping_address,shipping_phone,customer_name,customer_email,fulfilment_status').eq('stripe_session_id', session.id).single();
       if (lookupError || !order) return NextResponse.json({ error: 'Paid order could not be loaded for fulfilment.' }, { status: 500 });
       if (order.fulfilment_status === 'not_started') {
