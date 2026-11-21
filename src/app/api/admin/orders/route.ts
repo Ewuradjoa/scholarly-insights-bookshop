@@ -17,10 +17,13 @@ export async function PATCH(request: Request) {
   if (error) return NextResponse.json({ error }, { status: 403 });
   const body: unknown = await request.json().catch(() => null);
   if (!body || typeof body !== 'object') return NextResponse.json({ error: 'Order changes are required.' }, { status: 400 });
-  const { id, fulfilmentStatus, trackingUrl } = body as Record<string, unknown>;
-  const validStatuses = ['not_started','submitting','submission_failed','submitted','printing','shipped','rejected','delivered'];
-  if (typeof id !== 'string' || !validStatuses.includes(String(fulfilmentStatus)) || (trackingUrl !== undefined && trackingUrl !== null && (typeof trackingUrl !== 'string' || !/^https:\/\//i.test(trackingUrl)))) return NextResponse.json({ error: 'Check the fulfilment status and tracking link.' }, { status: 400 });
-  const { error: dbError } = await supabaseAdmin().from('orders').update({ fulfilment_status: fulfilmentStatus, tracking_url: trackingUrl || null }).eq('id', id);
+  const { id, trackingUrl } = body as Record<string, unknown>;
+  if (typeof id !== 'string' || (trackingUrl !== undefined && trackingUrl !== null && (typeof trackingUrl !== 'string' || trackingUrl.length > 2000 || !/^https:\/\//i.test(trackingUrl)))) return NextResponse.json({ error: 'Check the tracking link.' }, { status: 400 });
+  const db = supabaseAdmin();
+  const { data: order, error: lookupError } = await db.from('orders').select('edition,status').eq('id', id).maybeSingle();
+  if (lookupError) return NextResponse.json({ error: 'Could not load this order.' }, { status: 503 });
+  if (!order || order.edition !== 'paperback' || order.status !== 'paid') return NextResponse.json({ error: 'Tracking details can only be added to a paid paperback order.' }, { status: 409 });
+  const { error: dbError } = await db.from('orders').update({ tracking_url: trackingUrl || null }).eq('id', id);
   if (dbError) return NextResponse.json({ error: 'Could not update this order.' }, { status: 503 });
   return NextResponse.json({ updated: true });
 }
