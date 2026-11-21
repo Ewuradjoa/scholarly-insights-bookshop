@@ -9,6 +9,7 @@ export default defineConfig({
   worker: defineWorker({
     name: "scholarly-insights-bookshop",
     domains: ["books.scholarlyinsightsacademia.co.uk"],
+    previewUrls: false,
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-11-14",
     assets: {
@@ -31,8 +32,8 @@ export default defineConfig({
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.text(supabasePublishableKey),
       NEXT_PUBLIC_SUPABASE_URL: bindings.text(supabaseUrl),
       ORDER_EMAIL_FROM: bindings.text("Scholarly Insights Academia Bookshop <orders@scholarlyinsightsacademia.co.uk>"),
-      // Select test or live deliberately; price IDs must come from that same mode.
-      STRIPE_MODE: bindings.text(process.env.STRIPE_MODE ?? "test"),
+      // Production is configured for live Stripe; local development uses .env.example.
+      STRIPE_MODE: bindings.text(process.env.STRIPE_MODE ?? "live"),
       STRIPE_EBOOK_PRICE_ID: bindings.text(process.env.STRIPE_EBOOK_PRICE_ID ?? ""),
       STRIPE_PAPERBACK_PRICE_ID: bindings.text(process.env.STRIPE_PAPERBACK_PRICE_ID ?? ""),
       STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID: bindings.text(process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID ?? ""),
