@@ -40,13 +40,29 @@ export async function POST(request: Request) {
   }
 
   const stripe = new Stripe(stripeSecret);
+  const expectedAmount = edition === 'ebook' ? 999 : 1999;
+  const configuredPrice = await stripe.prices.retrieve(price).catch(() => null);
+  if (!configuredPrice?.active || configuredPrice.currency !== 'gbp' || configuredPrice.unit_amount !== expectedAmount || configuredPrice.type !== 'one_time') {
+    return NextResponse.json({ error: 'This edition’s Stripe price is not configured to the approved UK price.' }, { status: 503 });
+  }
+  const shippingOptions = [];
+  if (edition === 'paperback') {
+    for (const rateId of paperbackShippingRates) {
+      const rate = await stripe.shippingRates.retrieve(rateId).catch(() => null);
+      const isBasicDelivery = rateId === process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID;
+      if (!rate?.active || rate.type !== 'fixed_amount' || rate.fixed_amount?.currency !== 'gbp' || (isBasicDelivery && rate.fixed_amount.amount !== 0)) {
+        return NextResponse.json({ error: 'A paperback delivery price is not configured correctly.' }, { status: 503 });
+      }
+      shippingOptions.push({ shipping_rate: rateId });
+    }
+  }
   const session = await stripe.checkout.sessions.create({
-    mode: 'payment', line_items: [{ price, quantity: 1 }], billing_address_collection: 'required', customer_email: user.email,
+    mode: 'payment', payment_method_types: ['card'], line_items: [{ price, quantity: 1 }], billing_address_collection: 'required', customer_email: user.email,
     shipping_address_collection: edition === 'paperback' ? { allowed_countries: ['GB'] } : undefined,
-    shipping_options: edition === 'paperback' ? paperbackShippingRates.map((shipping_rate) => ({ shipping_rate })) : undefined,
+    shipping_options: edition === 'paperback' ? shippingOptions : undefined,
     phone_number_collection: edition === 'paperback' ? { enabled: true } : undefined,
     success_url: `${siteUrl}/order/thanks?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${siteUrl}/books/how-to-fall-out-of-love#editions`, allow_promotion_codes: true,
+    cancel_url: `${siteUrl}/books/how-to-fall-out-of-love#editions`,
     metadata: { book_slug: 'how-to-fall-out-of-love', edition, customer_user_id: user.id },
   });
   return NextResponse.json({ url: session.url });
