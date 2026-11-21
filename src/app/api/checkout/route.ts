@@ -17,6 +17,10 @@ export async function POST(request: Request) {
   }
 
   const edition = body.edition as 'ebook' | 'paperback';
+  const digitalContentConsent = 'digitalContentConsent' in body && body.digitalContentConsent === true;
+  if (edition === 'ebook' && !digitalContentConsent) {
+    return NextResponse.json({ error: 'Please confirm that you consent to immediate ebook delivery before checkout.' }, { status: 400 });
+  }
   const authorization = request.headers.get('authorization');
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -40,6 +44,7 @@ export async function POST(request: Request) {
   }
 
   const stripe = new Stripe(stripeSecret);
+  const digitalContentConsentAt = edition === 'ebook' ? new Date().toISOString() : undefined;
   const expectedAmount = edition === 'ebook' ? 999 : 1999;
   const configuredPrice = await stripe.prices.retrieve(price).catch(() => null);
   if (!configuredPrice?.active || configuredPrice.currency !== 'gbp' || configuredPrice.unit_amount !== expectedAmount || configuredPrice.type !== 'one_time') {
@@ -63,7 +68,12 @@ export async function POST(request: Request) {
     phone_number_collection: edition === 'paperback' ? { enabled: true } : undefined,
     success_url: `${siteUrl}/order/thanks?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${siteUrl}/books/how-to-fall-out-of-love#editions`,
-    metadata: { book_slug: 'how-to-fall-out-of-love', edition, customer_user_id: user.id },
+    metadata: {
+      book_slug: 'how-to-fall-out-of-love', edition, customer_user_id: user.id,
+      digital_content_consent: edition === 'ebook' ? 'accepted' : 'not_applicable',
+      ...(digitalContentConsentAt ? { digital_content_consent_at: digitalContentConsentAt } : {}),
+    },
   });
   return NextResponse.json({ url: session.url });
 }
+
