@@ -36,7 +36,7 @@ export default function DeliveryReturnsPage() {
         <p>To: Scholarly Insights Academia, 188 Carlton Road, Nottingham, NG3 2BB, United Kingdom</p>
         <p>Email: scholarlyinsightsconsulting@gmail.com</p>
         <p>I give notice that I cancel my contract for the sale of this paperback:</p>
-        <p>Book title: How to Fall Out of Love</p>
+        <p>Book title: ______________________________</p>
         <p>Order reference: ______________________________</p>
         <p>Ordered on / received on: ______________________________</p>
         <p>Name: ______________________________</p>
