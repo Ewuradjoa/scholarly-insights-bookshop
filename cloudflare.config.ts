@@ -32,8 +32,11 @@ export default defineConfig({
       LULU_AUTO_SUBMIT: bindings.text("false"),
       // Lulu file locations, checksums and production package details are added
       // only after fulfilment settings are completed in Cloudflare.
-      LULU_PRINT_API_BASE: bindings.text(process.env.LULU_PRINT_API_BASE ?? "https://api.sandbox.lulu.com"),
-      LULU_SANDBOX: bindings.text(process.env.LULU_SANDBOX ?? "true"),
+      // Production is the Cloudflare default; local development can opt into
+      // the sandbox through the values in .env.example.
+      LULU_MODE: bindings.text(process.env.LULU_MODE ?? "production"),
+      LULU_PRINT_API_BASE: bindings.text(process.env.LULU_PRINT_API_BASE ?? "https://api.lulu.com"),
+      LULU_SANDBOX: bindings.text(process.env.LULU_SANDBOX ?? "false"),
       NEXT_PUBLIC_SITE_URL: bindings.text("https://books.scholarlyinsightsacademia.co.uk"),
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.text(supabasePublishableKey),
       NEXT_PUBLIC_SUPABASE_URL: bindings.text(supabaseUrl),
