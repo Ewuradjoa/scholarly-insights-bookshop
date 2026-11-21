@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/admin-api';
-import { getSandboxPrintJobStatus, normalizeLuluStatus } from '@/lib/lulu';
+import { getLuluPrintJobStatus, normalizeLuluStatus } from '@/lib/lulu';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   const { data: order, error: lookupError } = await db.from('orders').select('id,lulu_job_id').eq('id', id).single();
   if (lookupError || !order?.lulu_job_id) return NextResponse.json({ error: 'This order has no Lulu print job yet.' }, { status: 404 });
   try {
-    const luluStatus = await getSandboxPrintJobStatus(order.lulu_job_id);
+    const luluStatus = await getLuluPrintJobStatus(order.lulu_job_id);
     const fulfilmentStatus = normalizeLuluStatus(luluStatus);
     if (fulfilmentStatus) {
       const { error: saveError } = await db.from('orders').update({ fulfilment_status: fulfilmentStatus }).eq('id', id);
@@ -21,6 +21,6 @@ export async function POST(request: Request) {
     }
     return NextResponse.json({ luluStatus, fulfilmentStatus });
   } catch {
-    return NextResponse.json({ error: 'Could not read the Lulu sandbox status. Check its sandbox credentials.' }, { status: 503 });
+    return NextResponse.json({ error: 'Could not read the Lulu print status. Check its credentials and environment settings.' }, { status: 503 });
   }
 }

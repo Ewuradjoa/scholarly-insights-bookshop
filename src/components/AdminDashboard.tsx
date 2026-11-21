@@ -77,14 +77,14 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
   }
 
   async function checkLuluConnection() {
-    setMessage('Checking Lulu sandbox authentication…');
+    setMessage('Checking Lulu authentication…');
     const session = await supabaseBrowser().auth.getSession();
     const response = await fetch('/api/admin/lulu/connection', {
       method: 'POST',
       headers: { Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
     });
-    const result = await response.json() as { error?: string };
-    setMessage(response.ok ? 'Lulu sandbox connection verified. No print job was created.' : result.error ?? 'Could not verify the Lulu sandbox connection.');
+    const result = await response.json() as { error?: string; environment?: 'sandbox' | 'production' };
+    setMessage(response.ok ? `Lulu ${result.environment} connection verified. No print job was created.` : result.error ?? 'Could not verify the Lulu connection.');
   }
 
   async function approveLuluSubmission(id: string) {
@@ -96,7 +96,7 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
       body: JSON.stringify({ id }),
     });
     const result = await response.json() as { error?: string };
-    setMessage(response.ok ? 'Owner approved: the paperback print job was sent to Lulu sandbox.' : result.error ?? 'The print job could not be submitted.');
+    setMessage(response.ok ? 'Owner approved: the paperback print job was sent to Lulu.' : result.error ?? 'The print job could not be submitted.');
     if (response.ok) await load();
   }
 
@@ -150,7 +150,7 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
     <p className="section-kicker">SCHOLARLY INSIGHTS · BOOKSHOP</p>
     <h1>Order desk</h1>
     <p className="admin-lede">Orders, fulfilment and reader notes in one place.</p>
-    <button className="admin-refresh" onClick={() => void checkLuluConnection()}>Check Lulu sandbox connection</button>
+    <button className="admin-refresh" onClick={() => void checkLuluConnection()}>Check Lulu connection</button>
     <div className="admin-cards">
       <article><small>ALL ORDERS</small><b>{orders.length}</b><span>Most recent 250 purchases</span></article>
       <article><small>REVIEWS TO CHECK</small><b>{reviews.filter((review) => review.status === 'pending').length}</b><span>Awaiting approval</span></article>
@@ -186,7 +186,7 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
             {order.edition === 'paperback' && order.status === 'paid' && order.fulfilment_status === 'not_started' && <small>Awaiting owner approval before print.</small>}
             {order.confirmation_email_status === 'failed' && order.status === 'paid' && <button className="admin-refresh" onClick={() => void retryOrderEmail(order.id)}>Retry confirmation email</button>}
             {order.shipping_address && <small>{Object.values(order.shipping_address).filter(Boolean).join(', ')}</small>}
-            {order.lulu_job_id && <small>Lulu sandbox job {order.lulu_job_id}</small>}
+            {order.lulu_job_id && <small>Lulu print job {order.lulu_job_id}</small>}
             {order.status === 'refunded' && order.lulu_job_id && <small className="fulfilment-error">Refund recorded. Check Lulu and cancel the print job manually if it has not shipped.</small>}
             {order.fulfilment_error && <small className="fulfilment-error">{order.fulfilment_error}</small>}
           </div>
@@ -194,7 +194,7 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
             {order.status === 'paid' && order.edition === 'paperback' && <input key={order.id + '-' + (order.tracking_url ?? '')} defaultValue={order.tracking_url ?? ''} placeholder="Tracking link (https://…)" onBlur={(event) => { if (event.target.value !== (order.tracking_url ?? '')) void update('/api/admin/orders', { id: order.id, trackingUrl: event.target.value || null }); }} />}
           </label>
           {order.lulu_job_id && <button className="admin-refresh" onClick={() => void refreshLulu(order.id)}>Refresh Lulu status</button>}
-          {ownerAccess && order.edition === 'paperback' && order.status === 'paid' && order.fulfilment_status === 'not_started' && !order.lulu_job_id && <button className="admin-refresh" onClick={() => void approveLuluSubmission(order.id)}>Approve and send to Lulu sandbox</button>}
+          {ownerAccess && order.edition === 'paperback' && order.status === 'paid' && order.fulfilment_status === 'not_started' && !order.lulu_job_id && <button className="admin-refresh" onClick={() => void approveLuluSubmission(order.id)}>Approve and send to Lulu</button>}
           {order.ebook_delivered_at && <small>Ebook link used {new Date(order.ebook_delivered_at).toLocaleDateString('en-GB')}</small>}
         </article>)}
       </div>}

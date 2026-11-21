@@ -9,6 +9,8 @@ export default defineConfig({
   worker: defineWorker({
     name: "scholarly-insights-bookshop",
     domains: ["books.scholarlyinsightsacademia.co.uk"],
+    // Match the Worker service's Cloudflare setting so CI deployments do not
+    // fail on a preview URL configuration conflict.
     previewUrls: false,
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-11-14",
@@ -26,13 +28,21 @@ export default defineConfig({
       FULFILMENT_CONFIGURED: bindings.text(process.env.FULFILMENT_CONFIGURED ?? "false"),
       LAUNCH_CHECKS_PASSED: bindings.text(process.env.LAUNCH_CHECKS_PASSED ?? "false"),
       LULU_AUTO_SUBMIT: bindings.text("false"),
-      LULU_PRINT_API_BASE: bindings.text("https://api.sandbox.lulu.com"),
-      LULU_SANDBOX: bindings.text("true"),
+      LULU_COVER_MD5: bindings.text(process.env.LULU_COVER_MD5 ?? ""),
+      LULU_COVER_OBJECT_PATH: bindings.text(process.env.LULU_COVER_OBJECT_PATH ?? ""),
+      LULU_FILES_BUCKET: bindings.text(process.env.LULU_FILES_BUCKET ?? ""),
+      LULU_INTERIOR_MD5: bindings.text(process.env.LULU_INTERIOR_MD5 ?? ""),
+      LULU_INTERIOR_OBJECT_PATH: bindings.text(process.env.LULU_INTERIOR_OBJECT_PATH ?? ""),
+      LULU_MODE: bindings.text(process.env.LULU_MODE ?? "sandbox"),
+      LULU_POD_PACKAGE_ID: bindings.text(process.env.LULU_POD_PACKAGE_ID ?? ""),
+      LULU_CONTACT_EMAIL: bindings.text(process.env.LULU_CONTACT_EMAIL ?? ""),
+      LULU_PRINT_API_BASE: bindings.text(process.env.LULU_PRINT_API_BASE ?? "https://api.sandbox.lulu.com"),
+      LULU_SANDBOX: bindings.text(process.env.LULU_SANDBOX ?? "true"),
       NEXT_PUBLIC_SITE_URL: bindings.text("https://books.scholarlyinsightsacademia.co.uk"),
       NEXT_PUBLIC_SUPABASE_ANON_KEY: bindings.text(supabasePublishableKey),
       NEXT_PUBLIC_SUPABASE_URL: bindings.text(supabaseUrl),
       ORDER_EMAIL_FROM: bindings.text("Scholarly Insights Academia Bookshop <orders@scholarlyinsightsacademia.co.uk>"),
-      // Production is configured for live Stripe; local development uses .env.example.
+      // Production uses live Stripe; local development uses .env.example.
       STRIPE_MODE: bindings.text(process.env.STRIPE_MODE ?? "live"),
       STRIPE_EBOOK_PRICE_ID: bindings.text(process.env.STRIPE_EBOOK_PRICE_ID ?? ""),
       STRIPE_PAPERBACK_PRICE_ID: bindings.text(process.env.STRIPE_PAPERBACK_PRICE_ID ?? ""),

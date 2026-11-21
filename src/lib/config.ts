@@ -12,10 +12,12 @@ export function checkoutReady() {
     && new Set([process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID, process.env.STRIPE_PAPERBACK_PRIORITY_SHIPPING_RATE_ID, process.env.STRIPE_PAPERBACK_EXPRESS_SHIPPING_RATE_ID]).size === 3
     && Boolean(process.env.RESEND_API_KEY && process.env.ORDER_EMAIL_FROM)
     && Boolean(process.env.EBOOK_PRIVATE_BUCKET && process.env.EBOOK_OBJECT_PATH && process.env.EBOOK_PDF_OBJECT_PATH)
-    && Boolean(process.env.LULU_CLIENT_KEY && process.env.LULU_CLIENT_SECRET && process.env.LULU_SANDBOX === 'true')
-    && process.env.LULU_PRINT_API_BASE === 'https://api.sandbox.lulu.com'
+    && process.env.LULU_MODE === 'production'
+    && Boolean(process.env.LULU_PRODUCTION_CLIENT_KEY && process.env.LULU_PRODUCTION_CLIENT_SECRET && process.env.LULU_SANDBOX === 'false')
+    && process.env.LULU_PRINT_API_BASE === 'https://api.lulu.com'
     && Boolean(process.env.LULU_CONTACT_EMAIL && process.env.LULU_POD_PACKAGE_ID)
-    && Boolean(process.env.LULU_INTERIOR_URL && process.env.LULU_INTERIOR_MD5 && process.env.LULU_COVER_URL && process.env.LULU_COVER_MD5)
+    && Boolean(process.env.LULU_FILES_BUCKET && process.env.LULU_INTERIOR_OBJECT_PATH && process.env.LULU_INTERIOR_MD5 && process.env.LULU_COVER_OBJECT_PATH && process.env.LULU_COVER_MD5)
+    && process.env.LULU_AUTO_SUBMIT === 'false'
     && process.env.FULFILMENT_CONFIGURED === 'true'
     && process.env.LAUNCH_CHECKS_PASSED === 'true';
 }

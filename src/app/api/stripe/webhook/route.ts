@@ -1,7 +1,6 @@
 import Stripe from 'stripe';
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { submitSandboxPrintJob } from '@/lib/lulu';
 import { sendOrderConfirmation } from '@/lib/order-email';
 
 export const runtime = 'nodejs';
@@ -79,24 +78,9 @@ export async function POST(request: Request) {
         }
       }
     }
-    if (edition === 'paperback' && process.env.LULU_AUTO_SUBMIT === 'true') {
-      const { data: order, error: lookupError } = await db.from('orders').select('id,shipping_address,shipping_phone,customer_name,customer_email,fulfilment_status').eq('stripe_session_id', session.id).single();
-      if (lookupError || !order) return NextResponse.json({ error: 'Paid order could not be loaded for fulfilment.' }, { status: 500 });
-      if (order.fulfilment_status === 'not_started') {
-        const { data: claimed, error: claimError } = await db.rpc('claim_lulu_submission', { p_order_id: order.id });
-        if (claimError) return NextResponse.json({ error: 'Paperback fulfilment could not be queued.' }, { status: 500 });
-        if (claimed?.length) {
-          try {
-            const job = await submitSandboxPrintJob({ orderId: order.id, shippingAddress: order.shipping_address, phone: order.shipping_phone, customerName: order.customer_name, shippingLevel: shippingLevel! });
-            const { error: saveError } = await db.from('orders').update({ lulu_job_id: job.id, fulfilment_status: 'submitted', fulfilment_error: null }).eq('id', order.id);
-            if (saveError) return NextResponse.json({ error: 'Print job was submitted but its reference could not be saved.' }, { status: 500 });
-          } catch {
-            await db.from('orders').update({ fulfilment_status: 'submission_failed', fulfilment_error: 'Lulu sandbox rejected or could not accept this print job. Review the order and print settings before retrying.' }).eq('id', order.id);
-            return NextResponse.json({ error: 'Paperback fulfilment submission failed.' }, { status: 500 });
-          }
-        }
-      }
-    }
+    // Paid paperbacks remain queued until the owner explicitly approves the
+    // individual order in the admin dashboard. Stripe webhooks never create
+    // billable Lulu print jobs.
   } else if (event.type === 'charge.refunded') {
     const charge = event.data.object as Stripe.Charge;
     const paymentIntentId = typeof charge.payment_intent === 'string' ? charge.payment_intent : null;

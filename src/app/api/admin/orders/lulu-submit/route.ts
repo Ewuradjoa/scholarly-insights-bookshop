@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { requireOwner } from '@/lib/admin-api';
-import { submitSandboxPrintJob } from '@/lib/lulu';
+import { submitLuluPrintJob } from '@/lib/lulu';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
   if (!claimed?.length) return NextResponse.json({ error: 'This order was already approved or is no longer eligible.' }, { status: 409 });
 
   try {
-    const job = await submitSandboxPrintJob({
+    const job = await submitLuluPrintJob({
       orderId: order.id,
       shippingAddress: order.shipping_address,
       phone: order.shipping_phone,
@@ -47,8 +47,8 @@ export async function POST(request: Request) {
   } catch {
     await db.from('orders').update({
       fulfilment_status: 'submission_failed',
-      fulfilment_error: 'Owner-approved submission to Lulu sandbox failed. Review the order and print settings before taking further action.',
+      fulfilment_error: 'Owner-approved submission to Lulu failed. Review the order and print settings before taking further action.',
     }).eq('id', order.id);
-    return NextResponse.json({ error: 'Lulu sandbox did not accept this owner-approved print job. Review the order and print settings.' }, { status: 503 });
+    return NextResponse.json({ error: 'Lulu did not accept this owner-approved print job. Review the order and print settings.' }, { status: 503 });
   }
 }
