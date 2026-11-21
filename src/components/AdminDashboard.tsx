@@ -1,24 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { supabaseBrowser } from '@/lib/supabase-browser';
 
 type Order = { id: string; edition: string; status: string; amount_total: number | null; currency: string | null; customer_email: string | null; customer_name: string | null; shipping_address: Record<string, string> | null; shipping_method?: string | null; created_at: string; ebook_delivered_at: string | null; confirmation_email_status: string; fulfilment_status: string; fulfilment_error: string | null; lulu_job_id: string | null; tracking_url: string | null };
 type Review = { id: string; rating: number; title: string | null; body: string; status: string; created_at: string; report_count: number };
 type Report = { id: string; review_id: string; reason: string; details: string | null; created_at: string };
+type StaffMember = { id: string; email: string; active: boolean; granted_at: string; revoked_at: string | null };
 
 export function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [message, setMessage] = useState('');
+  const [staff, setStaff] = useState<StaffMember[]>([]);
+  const [ownerAccess, setOwnerAccess] = useState(false);
+  const [staffEmail, setStaffEmail] = useState('');
+  const [staffMessage, setStaffMessage] = useState('');
 
   async function load() {
     const session = await supabaseBrowser().auth.getSession();
     const headers = { Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') };
-    const [ordersResponse, reviewsResponse] = await Promise.all([
+    const [ordersResponse, reviewsResponse, staffResponse] = await Promise.all([
       fetch('/api/admin/orders', { headers }),
       fetch('/api/admin/reviews', { headers }),
+      fetch('/api/admin/staff', { headers }),
     ]);
     if (!ordersResponse.ok || !reviewsResponse.ok) {
       setMessage('Could not load the admin data. Check your sign-in and configuration.');
@@ -29,6 +35,14 @@ export function AdminDashboard() {
     setOrders(Array.isArray(orderData.orders) ? orderData.orders : []);
     setReviews(Array.isArray(moderation.reviews) ? moderation.reviews : []);
     setReports(Array.isArray(moderation.reports) ? moderation.reports : []);
+    if (staffResponse.ok) {
+      const staffData = await staffResponse.json() as { staff?: StaffMember[] };
+      setStaff(Array.isArray(staffData.staff) ? staffData.staff : []);
+      setOwnerAccess(true);
+    } else if (staffResponse.status === 403) {
+      setOwnerAccess(false);
+      setStaff([]);
+    }
   }
 
   useEffect(() => { void load(); }, []);
@@ -83,6 +97,33 @@ export function AdminDashboard() {
     if (response.ok) await load();
   }
 
+  async function grantStaffAccess(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStaffMessage('');
+    const session = await supabaseBrowser().auth.getSession();
+    const response = await fetch('/api/admin/staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
+      body: JSON.stringify({ email: staffEmail }),
+    });
+    const result = await response.json() as { error?: string };
+    setStaffMessage(response.ok ? `Access granted to ${staffEmail.trim().toLowerCase()}. They can use their own confirmed account and authenticator.` : result.error ?? 'Staff access could not be granted.');
+    if (response.ok) { setStaffEmail(''); await load(); }
+  }
+
+  async function revokeStaffAccess(id: string) {
+    setStaffMessage('');
+    const session = await supabaseBrowser().auth.getSession();
+    const response = await fetch('/api/admin/staff', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (session.data.session?.access_token ?? '') },
+      body: JSON.stringify({ id, active: false }),
+    });
+    const result = await response.json() as { error?: string };
+    setStaffMessage(response.ok ? 'Staff access revoked.' : result.error ?? 'Staff access could not be revoked.');
+    if (response.ok) await load();
+  }
+
   async function signOut() {
     await supabaseBrowser().auth.signOut();
     window.location.assign('/admin/sign-in');
@@ -100,6 +141,22 @@ export function AdminDashboard() {
       <article><small>OPEN REPORTS</small><b>{reports.length}</b><span>Reader reports to review</span></article>
     </div>
     {message && <p role="status" className="admin-message">{message}</p>}
+
+    {ownerAccess && <section className="admin-section">
+        <h2>Staff access</h2>
+        <p>Only you can grant access. Staff use their own confirmed bookshop account, password and authenticator app; never share your sign-in.</p>
+        <p>Ask staff to create and confirm an account at <a href="/account">My account</a>, then add that same email here.</p>
+        <form className="admin-staff-form" onSubmit={grantStaffAccess}>
+          <label htmlFor="staff-email">Staff email address</label>
+          <input id="staff-email" type="email" required maxLength={254} value={staffEmail} onChange={(event) => setStaffEmail(event.target.value)} placeholder="colleague@example.com" />
+          <button className="admin-refresh" type="submit">Grant staff access</button>
+        </form>
+        {staffMessage && <p role="status" className="admin-message">{staffMessage}</p>}
+        {staff.length === 0 ? <p>No additional staff access has been granted.</p> : <div className="admin-staff-list">{staff.map((member) => <article key={member.id}>
+          <div><b>{member.email}</b><small>{member.active ? 'Active' : 'Revoked'} · Granted {new Date(member.granted_at).toLocaleDateString('en-GB')}{member.revoked_at ? ` · Revoked ${new Date(member.revoked_at).toLocaleDateString('en-GB')}` : ''}</small></div>
+          {member.active && <button type="button" className="admin-refresh" onClick={() => void revokeStaffAccess(member.id)}>Revoke access</button>}
+        </article>)}</div>}
+    </section>}
 
     <section className="admin-section">
       <h2>Orders</h2>

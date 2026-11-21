@@ -35,6 +35,6 @@ export default function Home() {
     </section>
 
     <section className="catalog-about" id="about"><div className="wrap catalog-about-inner"><span>✳</span><div><div className="section-kicker">SCHOLARLY INSIGHTS ACADEMIA</div><h2>Books that meet you<br/><em>where you are.</em></h2><p>A home for thoughtful writing about the questions, transitions and possibilities that shape our lives.</p></div><Link href={featuredBook.href}>Start with our first title <ArrowRight size={15}/></Link></div></section>
-    <footer className="footer wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><Link href="#books">Browse books</Link><Link href="/account">My account</Link><Link href="/admin/sign-in">Admin</Link><span>© 2026 Scholarly Insights Academia</span></footer>
+    <footer className="footer wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><Link href="#books">Browse books</Link><Link href="/account">My account</Link><span>© 2026 Scholarly Insights Academia</span></footer>
   </main>;
 }

@@ -1,3 +1,11 @@
 .admin-refresh{border:1px solid #d3d2c8;background:#f0efe8;padding:8px 10px;color:#555b49;font-size:10px;cursor:pointer;width:max-content}
 .admin-order select:disabled{opacity:.7;background:#f3f2ed}
 .fulfilment-error{color:#9b4c39!important}
+.admin-staff-form{display:grid;grid-template-columns:minmax(220px,1fr) auto;gap:8px;max-width:620px;margin:18px 0 24px;align-items:end}
+.admin-staff-form label{grid-column:1/-1;font-size:11px;font-weight:600}
+.admin-staff-form input{font:inherit;border:1px solid #d9d8ce;padding:10px;background:#fff;color:var(--ink)}
+.admin-staff-list{display:grid;max-width:720px}
+.admin-staff-list article{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:13px 0;border-bottom:1px solid var(--line);font-size:11px}
+.admin-staff-list b,.admin-staff-list small{display:block}
+.admin-staff-list small{color:var(--muted);margin-top:5px}
+@media(max-width:520px){.admin-staff-form{grid-template-columns:1fr}.admin-staff-form label{grid-column:auto}.admin-staff-list article{align-items:flex-start;flex-direction:column}}

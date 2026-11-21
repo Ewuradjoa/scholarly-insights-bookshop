@@ -30,6 +30,6 @@ export default function Home() {
     <ReviewSection />
 
     <section className="closing"><div className="wrap closing-inner"><span>✳</span><p>Your story is still unfolding.<br/><em>Let this be one gentle place to begin.</em></p><a href="#the-book">Back to the beginning ↑</a></div></section>
-    <footer className="footer wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><Link href="/account">My account</Link><Link href="/admin/sign-in">Admin</Link><span>© 2026 Scholarly Insights Academia</span><span>Thoughtfully made for the way forward.</span></footer>
+    <footer className="footer wrap"><Link href="/" className="brand"><span className="brand-mark">S</span><span>SCHOLARLY INSIGHTS<small>ACADEMIA · BOOKSHOP</small></span></Link><Link href="/account">My account</Link><span>© 2026 Scholarly Insights Academia</span><span>Thoughtfully made for the way forward.</span></footer>
   </main>;
 }
