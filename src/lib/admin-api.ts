@@ -1,18 +1,16 @@
 import { createClient, type User } from '@supabase/supabase-js';
-import { adminAllowlist } from '@/lib/config';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 export type AdminRole = 'owner' | 'staff';
 
 export function adminOwnerEmail() {
-  return (process.env.ADMIN_OWNER_EMAIL ?? adminAllowlist()[0] ?? '').trim().toLowerCase();
+  return (process.env.ADMIN_OWNER_EMAIL ?? '').trim().toLowerCase();
 }
 
 export async function getAdminRole(email: string): Promise<AdminRole | null> {
   const normalized = email.trim().toLowerCase();
   if (!normalized) return null;
   if (normalized === adminOwnerEmail()) return 'owner';
-  if (adminAllowlist().includes(normalized)) return 'staff';
   try {
     const { data, error } = await supabaseAdmin().from('admin_staff').select('id').eq('email', normalized).eq('active', true).maybeSingle();
     if (error) return null;

@@ -8,13 +8,13 @@ type Review = { id: string; rating: number; title: string | null; body: string; 
 type Report = { id: string; review_id: string; reason: string; details: string | null; created_at: string };
 type StaffMember = { id: string; email: string; active: boolean; granted_at: string; revoked_at: string | null };
 
-export function AdminDashboard() {
+export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [message, setMessage] = useState('');
   const [staff, setStaff] = useState<StaffMember[]>([]);
-  const [ownerAccess, setOwnerAccess] = useState(false);
+  const [ownerAccess, setOwnerAccess] = useState(isOwner);
   const [staffEmail, setStaffEmail] = useState('');
   const [staffMessage, setStaffMessage] = useState('');
 
@@ -42,6 +42,9 @@ export function AdminDashboard() {
     } else if (staffResponse.status === 403) {
       setOwnerAccess(false);
       setStaff([]);
+    } else if (isOwner) {
+      const staffData = await staffResponse.json().catch(() => ({})) as { error?: string };
+      setStaffMessage(staffData.error ?? 'Staff access could not be loaded.');
     }
   }
 
