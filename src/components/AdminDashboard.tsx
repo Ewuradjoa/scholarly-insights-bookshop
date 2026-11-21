@@ -187,15 +187,11 @@ export function AdminDashboard({ isOwner }: { isOwner: boolean }) {
             {order.confirmation_email_status === 'failed' && order.status === 'paid' && <button className="admin-refresh" onClick={() => void retryOrderEmail(order.id)}>Retry confirmation email</button>}
             {order.shipping_address && <small>{Object.values(order.shipping_address).filter(Boolean).join(', ')}</small>}
             {order.lulu_job_id && <small>Lulu sandbox job {order.lulu_job_id}</small>}
+            {order.status === 'refunded' && order.lulu_job_id && <small className="fulfilment-error">Refund recorded. Check Lulu and cancel the print job manually if it has not shipped.</small>}
             {order.fulfilment_error && <small className="fulfilment-error">{order.fulfilment_error}</small>}
           </div>
-          <label>Fulfilment
-            <select disabled={['submitting', 'submission_failed'].includes(order.fulfilment_status)} value={order.fulfilment_status} onChange={(event) => void update('/api/admin/orders', { id: order.id, fulfilmentStatus: event.target.value, trackingUrl: order.tracking_url })}>
-              {['not_started', 'submitting', 'submission_failed', 'submitted', 'printing', 'shipped', 'rejected', 'delivered'].map((status) => <option key={status} value={status}>{status.replaceAll('_', ' ')}</option>)}
-            </select>
-          </label>
-          <label>Tracking URL
-            <input key={order.id + '-' + (order.tracking_url ?? '')} defaultValue={order.tracking_url ?? ''} placeholder="https://…" onBlur={(event) => { if (event.target.value !== (order.tracking_url ?? '')) void update('/api/admin/orders', { id: order.id, fulfilmentStatus: order.fulfilment_status, trackingUrl: event.target.value || null }); }} />
+          <label>Fulfilment: {order.fulfilment_status.replaceAll('_', ' ')}
+            {order.status === 'paid' && order.edition === 'paperback' && <input key={order.id + '-' + (order.tracking_url ?? '')} defaultValue={order.tracking_url ?? ''} placeholder="Tracking link (https://…)" onBlur={(event) => { if (event.target.value !== (order.tracking_url ?? '')) void update('/api/admin/orders', { id: order.id, trackingUrl: event.target.value || null }); }} />}
           </label>
           {order.lulu_job_id && <button className="admin-refresh" onClick={() => void refreshLulu(order.id)}>Refresh Lulu status</button>}
           {ownerAccess && order.edition === 'paperback' && order.status === 'paid' && order.fulfilment_status === 'not_started' && !order.lulu_job_id && <button className="admin-refresh" onClick={() => void approveLuluSubmission(order.id)}>Approve and send to Lulu sandbox</button>}
