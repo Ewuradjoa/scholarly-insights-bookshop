@@ -9,7 +9,11 @@ export const runtime = 'nodejs';
 export async function POST(request: Request) {
   const secret = process.env.STRIPE_SECRET_KEY;
   const signingSecret = process.env.STRIPE_WEBHOOK_SECRET;
-  if (!secret || !signingSecret) return NextResponse.json({ error: 'Webhook is not configured.' }, { status: 503 });
+  const mode = process.env.STRIPE_MODE;
+  const correctStripeKey = mode === 'live'
+    ? (secret?.startsWith('sk_live_') || secret?.startsWith('rk_live_'))
+    : mode === 'test' && (secret?.startsWith('sk_test_') || secret?.startsWith('rk_test_'));
+  if (!correctStripeKey || !signingSecret) return NextResponse.json({ error: 'Stripe mode and webhook configuration do not match.' }, { status: 503 });
   const signature = request.headers.get('stripe-signature');
   if (!signature) return NextResponse.json({ error: 'Missing signature.' }, { status: 400 });
   const stripe = new Stripe(secret);
@@ -19,9 +23,19 @@ export async function POST(request: Request) {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session;
-    if (session.payment_status !== 'paid' || session.metadata?.book_slug !== 'how-to-fall-out-of-love' || !session.metadata.customer_user_id) return NextResponse.json({ received: true });
+    if (session.payment_status !== 'paid') return NextResponse.json({ received: true });
+    if (session.mode !== 'payment' || session.currency !== 'gbp' || session.metadata?.book_slug !== 'how-to-fall-out-of-love' || !session.metadata.customer_user_id) {
+      return NextResponse.json({ error: 'Paid checkout does not match a supported book order.' }, { status: 500 });
+    }
     const edition = session.metadata.edition;
-    if (edition !== 'ebook' && edition !== 'paperback') return NextResponse.json({ received: true });
+    if (edition !== 'ebook' && edition !== 'paperback') return NextResponse.json({ error: 'Paid checkout has an unsupported edition.' }, { status: 500 });
+    const expectedPriceId = edition === 'ebook' ? process.env.STRIPE_EBOOK_PRICE_ID : process.env.STRIPE_PAPERBACK_PRICE_ID;
+    const expectedSubtotal = edition === 'ebook' ? 999 : 1999;
+    const items = await stripe.checkout.sessions.listLineItems(session.id, { limit: 2 });
+    const item = items.data[0];
+    if (!expectedPriceId || items.data.length !== 1 || item.price?.id !== expectedPriceId || item.quantity !== 1 || item.amount_subtotal !== expectedSubtotal || session.amount_subtotal !== expectedSubtotal) {
+      return NextResponse.json({ error: 'Paid checkout amount or product does not match the approved order.' }, { status: 500 });
+    }
     const shippingRate = session.shipping_cost?.shipping_rate;
     const shippingRateId = typeof shippingRate === 'string' ? shippingRate : shippingRate?.id ?? null;
     const shippingLevels = new Map<string, 'MAIL' | 'PRIORITY_MAIL' | 'EXPRESS'>([
