@@ -17,7 +17,9 @@ let cachedTokenExpiresAt = 0;
 let cachedTokenMode: LuluMode | undefined;
 
 function configuredLulu() {
-  const mode = process.env.LULU_MODE as LuluMode | undefined;
+  // The current sandbox deployment uses the explicit sandbox flag. Production
+  // must set LULU_MODE=production so it can never be inferred from a false flag.
+  const mode = (process.env.LULU_MODE ?? (process.env.LULU_SANDBOX === 'true' ? 'sandbox' : undefined)) as LuluMode | undefined;
   if (mode !== 'sandbox' && mode !== 'production') throw new Error('Lulu environment is not configured.');
   const expectedBase = API_BASES[mode];
   const base = process.env.LULU_PRINT_API_BASE;

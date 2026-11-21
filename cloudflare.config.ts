@@ -11,7 +11,7 @@ export default defineConfig({
     domains: ["books.scholarlyinsightsacademia.co.uk"],
     // Match the Worker service's Cloudflare setting so CI deployments do not
     // fail on a preview URL configuration conflict.
-    previewUrls: false,
+    previewUrls: true,
     entrypoint: "vinext/server/fetch-handler",
     compatibilityDate: "2026-11-14",
     assets: {
@@ -28,14 +28,8 @@ export default defineConfig({
       FULFILMENT_CONFIGURED: bindings.text(process.env.FULFILMENT_CONFIGURED ?? "false"),
       LAUNCH_CHECKS_PASSED: bindings.text(process.env.LAUNCH_CHECKS_PASSED ?? "false"),
       LULU_AUTO_SUBMIT: bindings.text("false"),
-      LULU_COVER_MD5: bindings.text(process.env.LULU_COVER_MD5 ?? ""),
-      LULU_COVER_OBJECT_PATH: bindings.text(process.env.LULU_COVER_OBJECT_PATH ?? ""),
-      LULU_FILES_BUCKET: bindings.text(process.env.LULU_FILES_BUCKET ?? ""),
-      LULU_INTERIOR_MD5: bindings.text(process.env.LULU_INTERIOR_MD5 ?? ""),
-      LULU_INTERIOR_OBJECT_PATH: bindings.text(process.env.LULU_INTERIOR_OBJECT_PATH ?? ""),
-      LULU_MODE: bindings.text(process.env.LULU_MODE ?? "sandbox"),
-      LULU_POD_PACKAGE_ID: bindings.text(process.env.LULU_POD_PACKAGE_ID ?? ""),
-      LULU_CONTACT_EMAIL: bindings.text(process.env.LULU_CONTACT_EMAIL ?? ""),
+      // Lulu file locations, checksums and production package details are added
+      // only after fulfilment settings are completed in Cloudflare.
       LULU_PRINT_API_BASE: bindings.text(process.env.LULU_PRINT_API_BASE ?? "https://api.sandbox.lulu.com"),
       LULU_SANDBOX: bindings.text(process.env.LULU_SANDBOX ?? "true"),
       NEXT_PUBLIC_SITE_URL: bindings.text("https://books.scholarlyinsightsacademia.co.uk"),
