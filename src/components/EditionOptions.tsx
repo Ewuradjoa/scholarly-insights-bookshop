@@ -1,12 +1,20 @@
 'use client';
 
-export function EditionOptions({ checkoutOpen }: { checkoutOpen: boolean }) {
-  function choose(edition:'ebook'|'paperback') {
+type Edition = 'ebook' | 'paperback';
+
+export function EditionOptions({ checkoutOpen, edition }: { checkoutOpen: boolean; edition: Edition }) {
+  function choose() {
     if (!checkoutOpen) return;
     window.location.assign(`/checkout?edition=${edition}`);
   }
-  return <>
-    <button className="button button-muted" disabled={!checkoutOpen} onClick={()=>choose('ebook')}>{checkoutOpen?'Buy ebook':'Coming soon'}</button>
-    <button className="button button-dark" disabled={!checkoutOpen} onClick={()=>choose('paperback')}>{checkoutOpen?'Buy paperback':'Coming soon'}</button>
-  </>;
+
+  return (
+    <button
+      className={`button ${edition === 'paperback' ? 'button-dark' : 'button-muted'}`}
+      disabled={!checkoutOpen}
+      onClick={choose}
+    >
+      {checkoutOpen ? `Buy ${edition}` : 'Coming soon'}
+    </button>
+  );
 }
