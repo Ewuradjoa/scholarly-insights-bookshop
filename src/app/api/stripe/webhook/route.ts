@@ -46,7 +46,10 @@ export async function POST(request: Request) {
       [process.env.STRIPE_PAPERBACK_EXPRESS_SHIPPING_RATE_ID ?? '', 'EXPRESS'],
     ].filter(([rateId]) => Boolean(rateId)) as [string, 'MAIL' | 'PRIORITY_MAIL' | 'EXPRESS'][]);
     const shippingLevel = shippingRateId ? shippingLevels.get(shippingRateId) : undefined;
-    if (edition === 'paperback' && !shippingLevel) return NextResponse.json({ error: 'Selected Stripe delivery option is not mapped to Lulu.' }, { status: 500 });
+    const expectedShippingAmount = shippingLevel === 'PRIORITY_MAIL' ? 100 : shippingLevel === 'EXPRESS' ? 500 : 0;
+    if (edition === 'paperback' && (!shippingLevel || session.shipping_cost?.amount_total !== expectedShippingAmount)) {
+      return NextResponse.json({ error: 'Selected Stripe delivery option does not match the approved shipping price.' }, { status: 500 });
+    }
     const db = supabaseAdmin();
     const { error } = await db.from('orders').upsert({
       stripe_session_id: session.id, stripe_payment_intent_id: typeof session.payment_intent === 'string' ? session.payment_intent : null,

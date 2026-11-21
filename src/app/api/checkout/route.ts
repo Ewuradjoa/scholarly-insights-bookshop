@@ -54,8 +54,10 @@ export async function POST(request: Request) {
   if (edition === 'paperback') {
     for (const rateId of paperbackShippingRates) {
       const rate = await stripe.shippingRates.retrieve(rateId).catch(() => null);
-      const isBasicDelivery = rateId === process.env.STRIPE_PAPERBACK_BASIC_SHIPPING_RATE_ID;
-      if (!rate?.active || rate.type !== 'fixed_amount' || rate.fixed_amount?.currency !== 'gbp' || (isBasicDelivery && rate.fixed_amount.amount !== 0)) {
+      const expectedShippingAmount = rateId === process.env.STRIPE_PAPERBACK_PRIORITY_SHIPPING_RATE_ID
+        ? 100
+        : rateId === process.env.STRIPE_PAPERBACK_EXPRESS_SHIPPING_RATE_ID ? 500 : 0;
+      if (!rate?.active || rate.type !== 'fixed_amount' || rate.fixed_amount?.currency !== 'gbp' || rate.fixed_amount.amount !== expectedShippingAmount) {
         return NextResponse.json({ error: 'A paperback delivery price is not configured correctly.' }, { status: 503 });
       }
       shippingOptions.push({ shipping_rate: rateId });
