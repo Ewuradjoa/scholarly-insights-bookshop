@@ -6,12 +6,15 @@ export async function GET() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return NextResponse.json({ reviews: [], average: null, count: 0 });
   const db = createClient(url, key);
-  const { data, error } = await db.from('reviews').select('id,rating,title,body,created_at')
-    .eq('book_slug', 'how-to-fall-out-of-love').eq('status', 'approved').order('created_at', { ascending: false }).limit(100);
-  if (error) return NextResponse.json({ error: 'Reviews are temporarily unavailable.' }, { status: 503 });
+  const [{ data, error }, { data: summary, error: summaryError }] = await Promise.all([
+    db.from('reviews').select('id,rating,title,body,created_at')
+      .eq('book_slug', 'how-to-fall-out-of-love').eq('status', 'approved').order('created_at', { ascending: false }).limit(100),
+    db.rpc('approved_review_summary', { p_book_slug: 'how-to-fall-out-of-love' }),
+  ]);
+  if (error || summaryError) return NextResponse.json({ error: 'Reviews are temporarily unavailable.' }, { status: 503 });
   const rows = data ?? [];
-  const average = rows.length ? Math.round(rows.reduce((sum, review) => sum + review.rating, 0) / rows.length * 10) / 10 : null;
-  return NextResponse.json({ reviews: rows, average, count: rows.length }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } });
+  const stats = summary?.[0];
+  return NextResponse.json({ reviews: rows, average: stats?.average_rating == null ? null : Number(stats.average_rating), count: Number(stats?.review_count ?? 0) }, { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } });
 }
 
 // Authenticated customer token is passed to Supabase; review eligibility and uniqueness are enforced again by SQL/RLS.
