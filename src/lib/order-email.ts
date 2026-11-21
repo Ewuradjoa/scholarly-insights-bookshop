@@ -6,6 +6,7 @@ type OrderConfirmation = {
   currency: string | null;
   sessionId: string;
   digitalContentConsentAt?: string | null;
+  shippingMethod?: string | null;
 };
 
 export async function sendOrderConfirmation(order: OrderConfirmation) {
@@ -21,6 +22,12 @@ export async function sendOrderConfirmation(order: OrderConfirmation) {
     ? new Intl.NumberFormat('en-GB', { style: 'currency', currency: order.currency.toUpperCase() }).format(order.amountTotal / 100)
     : null;
   const accountUrl = new URL('/account', siteUrl).toString();
+  const termsUrl = new URL('/terms', siteUrl).toString();
+  const deliveryUrl = new URL('/delivery-returns', siteUrl).toString();
+  const contactUrl = new URL('/contact', siteUrl).toString();
+  const deliveryName = order.shippingMethod === 'MAIL' ? 'Basic tracked UK delivery'
+    : order.shippingMethod === 'PRIORITY_MAIL' ? 'Priority delivery'
+      : order.shippingMethod === 'EXPRESS' ? 'Express delivery' : null;
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -35,9 +42,10 @@ export async function sendOrderConfirmation(order: OrderConfirmation) {
       text: [
         'Thank you for your order.',
         '',
-        `Book: How to Fall Out of Love by Ewuradjoa Quansah`,
+        `Book: How to Fall Out of Love by Dr Ewuradjoa Mansa Quansah`,
         `Edition: ${editionName}`,
         total ? `Total paid: ${total}` : null,
+        deliveryName ? `Delivery selected: ${deliveryName}` : null,
         `Order reference: ${reference}`,
         '',
         order.edition === 'ebook'
@@ -46,6 +54,15 @@ export async function sendOrderConfirmation(order: OrderConfirmation) {
         order.edition === 'ebook' && order.digitalContentConsentAt
           ? `Digital content consent: You agreed to immediate ebook supply and acknowledged that your 14-day right to cancel would be lost once supply began. Consent recorded at: ${order.digitalContentConsentAt}.`
           : null,
+        order.edition === 'paperback'
+          ? 'You can cancel a paperback order within 14 days after the day you receive it. Contact us for return instructions. This does not affect your rights if an item is faulty or incorrect.'
+          : null,
+        '',
+        'Seller: Scholarly Insights Academia, 188 Carlton Road, Nottingham, NG3 2BB, United Kingdom.',
+        'Scholarly Insights Academia is not VAT registered; no VAT is charged.',
+        `Contact: scholarlyinsightsconsulting@gmail.com (${contactUrl})`,
+        `Terms of sale: ${termsUrl}`,
+        `Delivery, cancellation and returns: ${deliveryUrl}`,
         '',
         'Keep this email for your records. Your ebook download is protected and is not attached to this message.',
       ].filter(Boolean).join('\n'),

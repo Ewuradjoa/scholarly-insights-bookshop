@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       shipping_method: shippingLevel ?? null,
     }, { onConflict: 'stripe_session_id', ignoreDuplicates: true });
     if (error) return NextResponse.json({ error: 'Order could not be recorded.' }, { status: 500 });
-    const { data: orderForEmail, error: emailOrderError } = await db.from('orders').select('id,customer_email,edition,amount_total,currency,confirmation_email_status').eq('stripe_session_id', session.id).single();
+    const { data: orderForEmail, error: emailOrderError } = await db.from('orders').select('id,customer_email,edition,amount_total,currency,shipping_method,confirmation_email_status').eq('stripe_session_id', session.id).single();
     if (emailOrderError || !orderForEmail) return NextResponse.json({ error: 'Paid order could not be loaded for its confirmation email.' }, { status: 500 });
     if (orderForEmail.confirmation_email_status !== 'sent') {
       const { data: claimed, error: claimError } = await db.rpc('claim_order_confirmation_email', { p_order_id: orderForEmail.id });
@@ -72,6 +72,7 @@ export async function POST(request: Request) {
             edition: orderForEmail.edition,
             amountTotal: orderForEmail.amount_total,
             currency: orderForEmail.currency,
+            shippingMethod: orderForEmail.shipping_method,
             digitalContentConsentAt: session.metadata.digital_content_consent_at ?? null,
           });
           const { error: sentError } = await db.from('orders').update({ confirmation_email_status: 'sent', confirmation_email_sent_at: new Date().toISOString(), confirmation_email_error: null }).eq('id', orderForEmail.id);
