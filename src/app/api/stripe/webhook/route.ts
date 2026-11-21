@@ -28,6 +28,9 @@ export async function POST(request: Request) {
     }
     const edition = session.metadata.edition;
     if (edition !== 'ebook' && edition !== 'paperback') return NextResponse.json({ error: 'Paid checkout has an unsupported edition.' }, { status: 500 });
+    if (edition === 'ebook' && (session.metadata.digital_content_consent !== 'accepted' || !session.metadata.digital_content_consent_at)) {
+      return NextResponse.json({ error: 'Paid ebook checkout is missing its recorded immediate-delivery consent.' }, { status: 500 });
+    }
     const expectedPriceId = edition === 'ebook' ? process.env.STRIPE_EBOOK_PRICE_ID : process.env.STRIPE_PAPERBACK_PRICE_ID;
     const expectedSubtotal = edition === 'ebook' ? 999 : 1999;
     const items = await stripe.checkout.sessions.listLineItems(session.id, { limit: 2 });
@@ -69,6 +72,7 @@ export async function POST(request: Request) {
             edition: orderForEmail.edition,
             amountTotal: orderForEmail.amount_total,
             currency: orderForEmail.currency,
+            digitalContentConsentAt: session.metadata.digital_content_consent_at ?? null,
           });
           const { error: sentError } = await db.from('orders').update({ confirmation_email_status: 'sent', confirmation_email_sent_at: new Date().toISOString(), confirmation_email_error: null }).eq('id', orderForEmail.id);
           if (sentError) return NextResponse.json({ error: 'Confirmation email was sent but its status could not be saved.' }, { status: 500 });
@@ -91,3 +95,4 @@ export async function POST(request: Request) {
   }
   return NextResponse.json({ received: true });
 }
+
